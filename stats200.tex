@@ -1,0 +1,259 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,amssymb}
+\usepackage{lipsum}
+\usepackage{layout}
+\usepackage{geometry}
+\newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+\newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+
+\title{STATS200 class notes}
+\author{Erich Trieschman}
+\date{2021 Fall quarter}
+
+\newcommand{\userMarginInMm}{20}
+\geometry{
+%  legal,
+ left=\userMarginInMm mm,
+ right=\userMarginInMm mm,
+ top=\userMarginInMm mm,
+ bottom=20mm,
+ footskip=5mm}
+
+
+\begin{document}
+\maketitle
+
+% YOU ARE ON PAGE 49 OF THE NOTES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% COMBINATORICS AND PROBABILITY REVIEW
+\section{Combinatorics and probability review}
+\subsection{Counting}
+
+% EVENTS AND SETS
+\subsection{Events and sets}
+Set operations follow commutative, associative, and distributive laws:
+\begin{itemize}
+    \item $E \cup F = F \cup E$
+    \item $E\cap F = F \cap E $ (also written $EF = FE$)
+    \item $(E\cup F)\cup G = E \cup (f\cup G)$
+    \item $(E\cap F)\cap G = E\cap(F\cap G)$
+    \item $(E\cup F)\cap G = (E\cap G) \cup (F \cap G) = E\cap G \cup F \cap G$
+    \item $E\cap F\cup G = (E\cup G) \cap (F \cup G) = E\cup G \cap F \cup G$
+\end{itemize}
+\textbf{DeMorgan's Laws} relate the complement of a union to the intersection of complements:
+\begin{itemize}
+    \item $(\cup_{i=1}^n E_i)^c = \cap_{i=1}^nE_i^c$
+    \item $(\cap_{i=1}^n E_i)^c = \cup_{i=1}^nE_i^c$
+\end{itemize}
+
+% PROBABILITY
+\subsection{Probability}
+A \textbf{probability space} is defined by a triple of objects $(S, \mathcal{E}, P)$:
+\begin{itemize}
+    \item $S:$ Sample space
+    \item $\mathcal{E}:$ Set of possible events within the sample space. Set of events are assumed to be $\theta$-field (below)
+    \item $P:$ Probability for each event
+\end{itemize}
+A \textbf{$\theta$-field} is a collection of subsets $\mathcal{E} \subset S$ that satisfy
+\begin{itemize}
+    \item $0 \in \mathcal{E}$
+    \item $E \in \mathcal{E} \Rightarrow E^C \in \mathcal{E}$
+    \item $E_i \in \mathcal{E}$ for {$1, 2, \dots$} $\Rightarrow \cup_{i=1}^\infty E_i \in \mathcal{E}$
+\end{itemize}
+The \textbf{law of total probability} relates marginal probabilities to conditional probabilities. For a partition, {$E_1, E_2, \dots$} of set, $S$
+\begin{equation*}
+     P(A) = \sum_{i=1}^\infty P(A\cap E_i)
+\end{equation*}
+Where a partition implies i) $E_i, E_j$ are pairwise disjoint and ii) $\cup_{i=1}^\infty E_i = S$
+
+\noindent The \textbf{continuity of probability measures} state
+\begin{align*}
+    (i) \;& E_1 \subset E_2 \subset \dots \textrm{   Let } E_\infty = \cup_i E_i \textrm{, then } P(E_n) \longrightarrow P(E_\infty) \textrm{ as } n \longrightarrow \infty\\
+    (ii) \;& E_1 \supset E_2 \supset \dots \textrm{   Let } E_\infty = \cap_i E_i \textrm{, then } P(E_n) \longrightarrow P(E_\infty) \textrm{ as } n \longrightarrow \infty\\\\
+\end{align*}
+
+\subsubsection{Conditional probability}
+The conditional probability is the probability of one event occurring, given the other event occurring. A reframing of conditional probability (see formula below) is the probability of both events occurring, divided by the marginal probability of one of the events occurring. 
+\begin{align*}
+    p_{X|Y}(x|y) = \frac{p(x,y)}{p_y(y)}
+\end{align*}
+\textbf{Bayes Theorem} leverages conditional probabilities of measured events to glean conditional probabilities of unmeasured events:
+\begin{equation*}
+    P(E_i \mid B) = \frac{P(B \mid E_i)P(E_i)}{\sum_{j=1}^\infty P(B \mid E_j)P(E_j)} = \frac{P(B \mid E_i)P(E_i)}{P(B)}
+\end{equation*}
+Where $E_1, E_2, \dots$ form a partition of the sample space.
+
+\subsubsection{Independence}
+Events $A$ and $B$ are independent if $P(A\cap B) = P(A)P(B)$
+
+It is possible for events to be pairwise independent, but not mutually independent. For example, toss a pair of dice and let $D_1$ be the number for die 1 and $D_2$ be the number for die 2. Define $E_i = \{D_i \leq 2\}$. And define $E_3 = \{ 3 \leq \max(D_1, D_2) \leq 4 \}$. These events are pairwise independent, but $P(E_1\cap E_2 \cap E_3) = 0$, so they are not mutually independent. 
+
+% RANDOM VARIABLES
+\section{Random variables and expected value}
+\textbf{Random variables} are functions connecting a sample space to real numbers. They are formally defined as
+\begin{equation*}
+    \{ \omega \in S : X(\omega) \leq t \} \in \mathcal{E}
+\end{equation*}
+For example, if coin tosses produce a sample space of {Heads, Tails}, a random variable can be the number of heads. 
+\subsection{Expected value}
+The expected value (or mean) of a discrete random variable, $X$, is
+\begin{equation*}
+    E(X) = \sum_x xP(X=x)
+\end{equation*}
+Which can also be written as
+\begin{align*}
+    E(X) &= \sum_{x \in S} X(s)p(s) \textrm{, where $p(s)$ is the probability that element $s \in S$ occurs:}\\
+    \textrm{Proof:}&\\
+    E(X) &= \sum_i x_iP(X=x_i) \textrm{, for } E_i = \{X = x_i\} = \{s \in S : X(s) = x_i\}\\
+    &= \sum_i x_i \sum_{s\in E_i} p(s) = \sum_i \sum_{s\in E_i} x_i p(s)\\
+    &= \sum_i \sum_{s\in E_i} X(s) p(s) = \sum_{s\in S} x_i p(s)
+\end{align*}
+This latter equation structure helps build intuition about the linearity of the expected value function and allows us to derive several other properties of expected values. In the general case:
+\begin{align*}
+    E(g(X)) &= \sum_i g(x_i)p_X(x_i) \textrm{, assuming } g(x_i) = y_i\\
+    \textrm{Proof:}&\\
+    \sum_i g(x_i)p_X(x_i) &= \sum_j \sum_{i:g(x_i)=y_j} g(x_i) p_X(x_i) = \sum_j \sum_{i:g(x_i)=y_j} y_j p_X(x_i) \\
+    &= \sum_j y_j \sum_{i:g(x_i)=y_j} p_X(x_i) = \sum_j y_j P(g(X) = x_i)\\
+    &= E(g(X))
+\end{align*}
+And from this general equation we can get two key properties of the expected value:
+\begin{align*}
+    (i) \; & E(aX + b) = aE(X) + b\\
+    & E(aX + b) = \sum_{x\in S} (aX(s) + b) p(s) = a\sum_{s\in S}X(s)p(s) + \sum_{s\in S}bp(s) = aE(X) + b\\ \\
+    (ii) \; & E(X + Y) = E(X) + E(Y)\\
+    & E(X + Y) = \sum_{s \in S} (X(s) + Y(s))p(s) = \sum_{s \in S} X(s)p(s) + \sum_{s \in S} Y(s)p(s) = E(X) + E(Y)
+\end{align*}
+\subsection{Variance, covariance, and correlation}
+The \textbf{variance} of X is defined in relation to $E(X) = \mu$ as the expected value of the squared difference between the random variable the mean. The standard deviation, $\sigma$ is defined as the square root of the variance.
+\begin{align*}
+    Var(X) &= E((X - \mu)^2) = \sigma^2\\
+    SD &= \sqrt{Var(X)} = \sqrt{\sigma^2} = \sigma
+\end{align*}
+Several properties of variance follow from linearity of expectation:
+\begin{align*}
+    (i) \; & Var(X) = E(X^2) - \mu^2\\
+    & Var(X) = E((X - \mu)^2) = E(X^2 - 2X\mu + \mu^2) = E(X^2 - 2\mu X + \mu^2) \\
+    & Var(X) = E(X^2) - 2\mu^2 + \mu^2 = E(X^2) - \mu^2\\ \\
+    (ii) \; & Var(aX+b) = a^2Var(X) \\
+    & Var(aX + b) = E((aX + b)^2) - E(aX + b)^2 = E(a^2X^2 + 2abX + b^2) - (aE(X)+b)^2\\
+    & Var(aX + b) =a^2E(X^2) + 2abE(X) + b^2 - a^2E(X)^2 - 2abE(X) - b^2 = a^2E(X^2) - a^2E(X)^2 = a^2(E(X^2) - E(X)^2)
+\end{align*}
+
+
+% DISTRIBUTION FUNCTIONS
+\section{Distribution functions}
+\subsection{Probability mass functions}
+\subsubsection{Binomial distribution}
+\textbf{Probability mass function ($Bin(n,p)$):} For random variable $X$, the number of successes in $n$ trials, the probability of observing $j$ successes where each success has probability $p$ is
+\begin{align*}
+    P(X = j) = {n \choose j}p^j(1-p)^{n-j}
+\end{align*}
+\textbf{Expected value:}
+\textbf{Variance:}
+
+\subsubsection{Geometric distribution}
+\textbf{Probability mass function ($Geom(p)$):} For random variable $X$, the number of trials until the first success (included) with probability $p$ is
+\begin{equation*}
+    P(X=j) = (1-p)^{j-1}p
+\end{equation*}
+\textbf{Expected value:}
+\textbf{Variance:}
+
+\subsubsection{Negative binomial}
+\textbf{Probability mass function ($Geom(p)$):}
+\textbf{Expected value:}
+\textbf{Variance:}
+
+\subsection{Probability density function and cumulative distribution functions}
+\subsubsection{Normal distribution}
+\textbf{Probability mass function ():}
+\textbf{Expected value:}
+\textbf{Variance:}
+\subsubsection{Exponential distribution}
+\textbf{Probability mass function ():}
+\textbf{Expected value:}
+\textbf{Variance:}
+\subsubsection{Poisson distribution}
+\textbf{Probability mass function ():}
+\textbf{Expected value:}
+\textbf{Variance:}
+\subsubsection{Gamma distribution}
+
+% MARGINAL, JOINT, AND CONDITIONAL DISTRIBUTIONS
+\section{Marginal, joint, and conditional distributions}
+
+% JOINT DISTRIBUTIONS
+\subsection{Joint distributions}
+The cumulative density function (cdf) and probability mass function (pmf) satisfy respectively
+\begin{align*}
+    \textrm{cdf: } F_{X_1,\dots,X_n}(x_1, \dots, x_n) = P(X_i \leq x_1, \dots, X_n \leq x_n)\\
+    \textrm{pmf: } f_{X_1,\dots,X_n}(x_1, \dots, x_n) = P(X_1=x_1, \dots, X_n = x_n)
+\end{align*}
+The joint density function $f$ then satisfies, for $E \subset \mathbb{R}^n$,
+\begin{equation*}
+    P((X_1, \dots, X_n)\in E) = \int \dots \int_E f_{X_1,\dots,X_n}dx_1\dots dx_n
+\end{equation*}
+When random variables are independent, the joint cdf and pmf satisfy respectively
+\begin{align*}
+    \textrm{cdf: } & P(X_1\leq x_1, \dots, X_n \leq x_n) = P(X_1\leq x_1)\dots P(X_n\leq x_n)\\
+    \textrm{pmf: } & P(X_1= x_1, \dots, X_n = x_n) = P(X_1=x_1)\dots P(X_n=x_n)\\
+\end{align*}
+
+\subsubsection{Distribution of sums of independent random variables}
+The following combination of marginal distributions is called a \textbf{convolution}.\\
+If $X$ and $Y$ have densities, the cdf of $X+Y$ is
+\begin{align*}
+    F_{X+Y}(t) &= P(X+Y\leq t)\\
+    &= P(X \leq t-y)\\
+    &= \int_{-\infty}^\infty P(X \leq t-y \mid Y=y) f_x(y)dy \textrm{, to get marginal distribution}\\
+    &= \int_{-\infty}^\infty F_x(X \leq t-y) f_x(y)dy \textrm{, since $X,Y$ independent}
+\end{align*}
+Likewise, the density of the sum is
+\begin{equation*}
+    f_{X+Y}(t) = \int_{-\infty}^\infty f_x(X \leq t-y) f_x(y)dy
+\end{equation*}
+
+\subsubsection{Expectation of joint distributions}
+For $X,Y$ joint distribution, $f_{X,Y}(x,y)$, or probability mass function, $p(x,y)$
+\begin{align*}
+    \textrm{pmf: } E[g(X,Y)] &= \sum_s g(X(s), Y(s))p(s)\\
+    &= \sum_x\sum_y g(x,y) \sum_{s:X(s)=x,Y(s)=y}p(s)\\
+    &= \sum_x\sum_y g(x,y)p(x,y)\\ \\
+    \textrm{pdf: } E[g(X,Y)] &= \int_{y= -\infty}^{\infty} \int_{x= -\infty}^{\infty} g(x,y)f(x,y)dxdy
+\end{align*}
+
+% MARGINAL DISTRIBUTIONS
+\subsection{Marginal distributions}
+Marginal density functions or marginal probability mass functions are obtained by integrating or summing out the other variables
+\begin{equation*}
+    f_Y(y) = \sum_x y P(Y = y \mid x)
+\end{equation*}
+
+% CONDITIONAL DISTRIBUTIONS
+\subsection{Conditional distributions}
+\textrm{Reminder: }
+\begin{align*}
+    p_{X|Y}(x|y) = \frac{p(x,y)}{p_y(y)}
+\end{align*}
+We can use conditional probabilities to restate the \textbf{law of total probability}:
+\begin{equation*}
+    P(E) = \int_{-\infty}^\infty P(E \mid X=x)f(x)dx
+\end{equation*}
+
+% MOMENT GENERATING FUNCTIONS
+\section{Moment generating functions}
+
+% CONVERGENCE
+\section{Convergence}
+\subsection{Vector products}
+
+% CALCULUS REVIEW
+\section{Calculus review}
+\subsection{Infinite sums and series}
+\subsection{Integration}
+\subsection{Derivatives}
+
+
+\end{document}

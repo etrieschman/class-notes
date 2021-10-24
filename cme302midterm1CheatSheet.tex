@@ -1,0 +1,409 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,amssymb}
+\usepackage{lipsum}
+\usepackage{layout}
+\usepackage{geometry}
+\newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+\newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+
+\title{CME302 class notes}
+\author{Erich Trieschman}
+\date{2021 Fall quarter}
+
+\newcommand{\userMarginInMm}{10mm}
+\geometry{
+ legal,
+ left=\userMarginInMm,
+ right=\userMarginInMm,
+ top=\userMarginInMm,
+ bottom=15mm,
+ footskip=5mm
+ }
+
+
+%HEADERS
+% https://web.mit.edu/texsrc/source/latex/layouts/layman.pdf
+% \textheight=650pt
+% \textwidth=450pt
+% \headheight=-25pt
+% \oddsidemargin=5pt
+% \footskip=25
+
+\begin{document}
+
+\section{Linear algebra review}
+
+\subsection{Vector products}
+$x^Ty = \sum x_i*y_i$. $x^Ty = \norm{x}{2}\norm{y}{2}\cos\theta$.
+$x^Ty = 0 \Leftrightarrow x \perp y$
+
+\subsection{Norms}
+Measures of the length of vectors and matrices. All norms satisfy
+\begin{itemize}
+    \item Only zero vector has zero norm: $\norm{x}{x} = 0 \Leftrightarrow x = 0$
+    \item $\norm{\alpha x}{x} = \abs{\alpha}\norm{x}{x}$
+    \item $\norm{x+y}{x} \leq \norm{x}{x} + \norm{y}{x}$ (Triangle inequality)
+    (also $\norm{x-y}{x} \geq \norm{x}{x} - \norm{y}{x}$)
+\end{itemize}
+
+\subsubsection{Vector norms}
+\begin{itemize}
+    \item $\norm{x}{1} = \sum_{i=1}^n \abs{x_i}$
+    \item $\norm{x}{2} = \sqrt{\sum_{i=1}^n (x_i)^2}$
+    \item $\norm{x}{\infty} = \max_{i \in i,\dots, n} \abs{x_i}$
+    \item $\norm{x}{p} = (\sum_{i=1}^n \abs{x_i}^p)^{\frac{1}{p}}$
+\end{itemize}
+\textbf{Cauchy-Schwarts Inequality:} $\abs{x^Ty}\leq \norm{x}{2}\norm{y}{2}$ (note equality when $x^Ty = 0$)\\ \\
+\textbf{Holder's Inequality:} $\abs{x^Ty} \leq \norm{x}{p}\norm{y}{q}$, for $p, q$ , s.t. $\frac{1}{p} + \frac{1}{q} = 1$
+
+\subsubsection{Matrix norms}
+\noindent Types of \textbf{matrix norms}, $A \in \mathbb{R}^{n \times m}$
+\begin{itemize}
+    \item $\norm{A}{\infty} = \sup_{x\neq 0}\frac{\norm{Ax}{\infty}}{\norm{x}{\infty}} = \max_{\norm{x}{\infty}=1}\norm{Ax}{\infty} = \max_i\norm{a_i^T}{1}$
+    \item $\norm{A}{p} = \sup_{x\neq 0}\frac{\norm{Ax}{p}}{\norm{x}{p}} = \max_{\norm{x}{p}=1}\norm{Ax}{p}$
+    \item $\norm{A}{F} = \sqrt{\sum_{i,j} a_{ij}^2} = \sqrt{tr(AA^T)} = \sqrt{tr(A^TA)} = \sqrt{\sum_{k=1}^{min(m,n)}\sigma_k^2} $
+\end{itemize}
+\textbf{Submultiplicative inverse:} $\norm{AB}{p} \leq \norm{A}{p}\norm{B}{p}$. Note: this is not always true for Frobenius norms.\\ \\
+\textbf{Induced 2-norm: } $\norm{Ay}{p} \leq \norm{A}{p}\norm{y}{p}$\\ \\
+\textbf{Orthogonally invariant:} Orthogonal matrices do not change the norms of vectors or matrices:
+\begin{itemize}
+    \item $\norm{Qx}{x} = \norm{x}{p}$
+    \item $\norm{QA}{x} = \norm{A}{x}, x \in \{p, F\}$
+\end{itemize}
+
+\textbf{Other norm properties}
+\begin{itemize}
+    \item $\norm{x}{\infty} \leq \norm{x}{2} \leq \sqrt{n}\norm{x}{\infty}$
+    \item $\norm{A}{2} \leq \sqrt{m}\norm{A}{\infty}$
+    \item $\norm{A}{\infty} \leq \sqrt{n}\norm{A}{2}$
+\end{itemize}
+
+\subsection{Matrix properties}
+\subsubsection{Determinant}
+Determinant represents how volume of hypercube is tranformed by a matrix.
+\begin{itemize}
+    \item For square matrix, $det(\alpha A) = \alpha^ndet(A)$
+    \item For square matrices, $det(AB) = det(A)det(B)$
+    \item $det(A) = det(A^T)$
+    \item $det(A^{-1}) = \frac{1}{det(A)}$
+    \item For square matrix, $A$ singular $\Leftrightarrow det(A) = 0 \Leftrightarrow$ columns of $A$ are not linearly independent
+\end{itemize}
+
+\subsubsection{Trace}
+$tr(A) = \sum_{i = 1}^n a_{ii}$
+\begin{itemize}
+    \item $tr(A) = tr(A^T)$
+    \item $tr(A + \alpha B) = tr(A) + \alpha tr(B)$
+    \item Trace is invariant under cyclic permutations, that is $tr(ABCD) = tr(BCDA) = tr(CDAB) = tr(DABC)$
+    \item For two vectors, $u, v \in \mathbb{R}, tr(uv^T) = v^Tu$
+\end{itemize}
+
+\subsubsection{Inverses and transposes}
+The inverse of the transpose is the transpose of the inverse: $A^T(A^{-1})^T = (A^{-1}A)^T = I^T = I = I^T = (AA^{-1})^T = (A^{-1})^TA^T$
+
+\subsubsection{Sherman-Morrison-Woodbury formula} 
+for $A\in \mathbb{R}^{n\times n}, U,V \in \mathbb{R}^{n\times k} \; (A+UV^T)^{-1} = A^{-1} - A^{-1}U(I+V^TA^{-1}U)^{-1}V^TA^{-1}$\\
+\textbf{Proof:} begin with the inverse of the $LHS$ multiplied by the $RHS$: $(A+UV^T) (A^{-1} - A^{-1}U(I+V^TA^{-1}U)^{-1}V^TA^{-1})$. Next perform matrix multiplication. The end result will be $I$
+
+
+\subsection{Orthogonal matrices}
+An orthogonal matrix, $Q$ is a matrix whose columns are orthonormal. That is $q_i^Tq_j = 1$ for $i=j$, $q_i^Tq_j = 0$ for $i\neq j$. Equivalently, $Q^TQ = I$. For square matrices, $Q^TQ = QQ^T = I$
+
+\subsection{Projections, reflections, and rotations}
+\subsubsection{Projections}
+A projection, $v$, of vector $x$ onto vector $y$ can be written in the form $v = \frac{y^Tx}{y^Ty}y$. Which can be interpreted as the portion of $x$ in the direction of $y$ ($y^Tx$), times the direction of $y$, divided by the length of $y$ twice ($y^Ty = \norm{y}{2}^2$), since $y$ appears in the dot product and in the vector.
+
+\noindent \textbf{Projection matrices} are square matrices, $P$, s.t., $P^2 = P$. 
+
+\subsubsection{Reflection}
+$P$ is a reflection matrix $\Leftrightarrow P^2 = I$. $P$ can be written in the form $P = I - \beta vv^T$, with $\beta = \frac{2}{v^Tv}$, and $v$ the vector orthogonal to the line/plane of reflection. It can be shown that $Px = x \Leftrightarrow v^Tx = 0$. These x are called the "fixed points" of $P$.
+
+% SYMMETRIC POSITIVE DEFINITE
+\subsection{Symmetric Positive Definite (SPD) Matrices}
+For $A$, SPD, $A = A^T$, $x^TAx > 0$  $\forall x \neq 0$, $a_{ii} > 0$, $\lambda(A) \geq 0$. And for $B$ nonsingular, $B^TAB$ is also SPD\\ \\
+When proving properties of SPDs, use the following tricks: i) Multiply by $e_i$ since $e_i \neq 0$. Use matrix transpose property, $x^TA^T = (Ax)^T$ to rearrange formulas
+
+\subsubsection{$B^TAB$ is also SPD} 
+If $A$ SPD $\Rightarrow B^TAB$ SPD for $B$ nonsingular: $x^TB^TABx = (Bx)^TA(Bx) > 0, \textrm{(since $B$ nonsingular $\Rightarrow Bx \neq 0$)}$
+
+% EIGENVALUES
+\subsection{Eigenvalues}
+Observe by definition $Ax&= \lambda x \Rightarrow (A - \lambda I)x &= 0$. To find lambda, we solve for the system of equations to satisfy $(A - \lambda I)x = 0$. Also, $\lambda(A) = \lambda(A^T)$\\ \\
+The \textbf{algebraic multiplicity} of an eigenvalue, $\lambda_i$, is the number of times that the value $\lambda_i$ appears as an eigenvalue of $A$\\
+e.g., for characteristic equation $p(x) = (x-2)^3(x-1)^2$, $\lambda = 2$ has algebraic multiplicity of 3\\
+The \textbf{geometric multiplicity} of an eigenvalue, $\lambda_i$, is the dimension of the space spanned by the eigenvectors of $\lambda_i$\\
+
+% DETERMINANTS/TRACE
+\subsubsection{Determinants and trace}
+$ det(A) = \prod_{i=1}^n \lambda_i$;  $tr(A) &= \sum_{i=1}^n \lambda_i$
+
+% TRIANGULAR MATRICES
+\subsubsection{Triangular matrices}
+For $T$ triangular, the eigenvalues appear on the diagonal: $t_{ii} = \lambda_i, \forall i \in \{1,\dots, n\}$. \textbf{Corollary:} $T$ nonsingular $\Leftrightarrow$ all $t_{ii} \neq 0$
+
+% GERSHGORIN DISC
+\subsubsection{Gershgorin disc theorem}
+Gershgorin disc, $\mathbb{D}_i = \mathbb{D}_i = \{z \in \mathbb{C} \mid \lvert z - a_{ii}\rvert \leq \sum_{j \neq i} \lvert a_{ij}\rvert\}$. All eigenvalues of $A$, $\lambda(A) \in \mathbb{C}$ are located in one of its Gershgorin discs\\
+\textbf{Proof:}
+\begin{align*}
+    (A - \lambda I)x &= 0\\
+    \sum_{j \neq i} a_{ij}x_j + (a_{ii} - \lambda)x_i &= 0, \; \forall \space i \in \{1, \dots, n\}\\
+    \textrm{Choose } i \; s.t. \lvert x_i\rvert  = \max_{i} \lvert x_i \rvert  \\
+    \lvert (a_{ii} - \lambda) \rvert &= \lvert \sum_{j \neq i} \frac{a_{ij}x_j}{x_i}\rvert
+    \leq \sum_{j \neq i} \lvert \frac{a_{ij}x_j}{x_i}\rvert \; \textrm{, by triangle inequality}\\
+    \lvert (\lambda - a_{ii}) \rvert &\leq \sum_{j \neq i} \lvert a_{ij}\rvert 
+    \textrm{, since $\lvert \frac{x_j}{x_i} \rvert \leq 1$}
+\end{align*}
+
+% DECOMPOSITIONS
+\section{Matrix Decompositions}
+% SCHUR DECOMP
+\subsection{Schur Decomposition}
+\begin{itemize}
+    \item For any $A \in \mathbb{C}^{n \times n}$, $A = QTQ^H \textrm{, where $Q$ unitary ($Q^HQ = I), Q \in \mathbb{C}^{n \times n}$, $T$ upper triangular}$
+    \item When $A \in \mathbb{R}^{n \times n}$, the Real Schur Decomposition becomes $A = QTQ^T$ , where $Q$ orthogonal ($Q^TQ = I), Q \in \mathbb{R}^{n \times n}$, $T$ upper triangular
+    \item Note: If $T$ is relaxed from strict upper triangular to block upper triangular (blocks of $2\times 2$ or $1 \times 1$ on the diagonal), then $Q$ can be selected to be in $\mathbb{R}^{n\times n}$.
+\end{itemize}
+
+
+% EIGENVALUE DECOMP
+\subsection{Eigenvalue Decomposition}
+\begin{itemize} 
+    \item For $A$ diagonalizable ($A\in \mathbb{R}^{n\times n}$ with $n$ linearly independent eigenvectors), it can be decomposed as $A = X \Lambda X^{-1}$ , where $\Lambda$ a diagonal matrix of the eigenvalues of $A$
+    \item For $A$ real symmetric, $A$ can be decomposed as $A = Q\Lambda Q^T, Q \textrm{ orthogonal}$
+    \item For $A$ unitarily diagonalizable ($\Leftrightarrow$ normal: $A^HA = AA^H$), $A$ can be decomposed as $A = Q\Lambda Q^H, Q \textrm{ unitary}$. When $A$ complex Hermitian ($A = A^H$), $\Lambda \in \mathbb{R}$
+
+% SINGULAR VALUE DECOMP
+\subsection{Singular Value Decomposition}
+\textbf{Definition:} For any $A \in \mathbb{C}^{m\times n}$ there exist two unitary matrices, $U \in \mathbb{C}^{m \times m}$ and $V \in \mathbb{C}^{n \times n}$, and a diagonal matrix $\Sigma \in \mathbb{R}^{m \times n}$ such that $A &= U\Sigma V^H$. When $A \in \mathbb{R}^{m \times n}, A &= U\Sigma V^T$ with $U, V, \Sigma \in \mathbb{R}$.\\ \\
+The singular values, $\sigma_i$ of $\Sigma$ are always $\geq0$. And by convention, they're ordered in decreasing order, so $\sigma_1 \geq \sigma_2 \geq \dots \geq \sigma_n$ \\ \\
+
+\textbf{Derivation:} Observe $A^TA$ symmetric: $(A^TA)^T = A^TA$
+\begin{align*}
+    A^TA \textrm{ symmetric} &\Rightarrow \exists \; Q \textrm{ orthogonal and } \Lambda \textrm{ diagonal matrix of $\lambda_i$ s.t., }\\
+    A^TA & = Q\Lambda Q^T \Rightarrow Q^TA^TAQ = Q^TQ\Lambda Q^TQ\\
+    (AQ)^T(AQ) & = \Lambda \textrm{, note $AQ$ is orthogonal, but not scaled to 1. Instead, each row is} \\
+    &\textrm{scaled to the eigenvalue in that row: }\lambda_i  = \norm{Aq_i}{2}^2\\
+    \\
+    \textrm{When $A$ is full rank,}&\\
+    A &= AQQ^T = (AQ) Q^T = AQD^{-1}DQ^T \textrm{, where } D = \begin{bmatrix} \sqrt{\lambda_1} & \dots & 0\\ 
+        \vdots & & \vdots\\ 0 & \dots & \sqrt{\lambda_n} \end{bmatrix} \textrm{ and } D^{-1} = \begin{bmatrix} \frac{1}{\sqrt{\lambda_1}} & \dots & 0\\ 
+        \vdots & & \vdots\\ 0 & \dots & \frac{1}{\sqrt{\lambda_n}} \end{bmatrix}\\
+    A &= U\Sigma V^T \textrm{, where } U  = AQD^{-1}, \Sigma = D, V^T = Q^T\\
+\end{align*}
+When $A$ is not full rank, this does not hold since $\lambda_i = 0$ for some $i$ so we cannot construct $U$ with $D^{-1}$. The trick in this case is to construct a tall/thin $AQ$, and a $D$ with $\sqrt{\lambda_i}$ where nonzero in the upper block, and an Identity matrix in the lower block. And a few additional properties and remarks of $A \in \mathbb{R}^{n\times m}$ SVD
+\begin{itemize}
+    \item $\norm{A}{2} = \sigma_1$; $\norm{A^{-1}}{2} = \frac{1}{\sigma_n$} when $A$ nonsingular
+    \item $\norm{A}{F} = \sqrt{\sum_i^{min\{n,m\}}\sigma_i^2}$
+    \item When $A$ symmetric, $\sigma_i = \abs{\lambda_i}$. When $A$ orthogonal, $\sigma_1 = \dots = \sigma_n = 1$
+    \item The eigenvalues of $A^TA$ and $AA^T$ are the squares of the singular values of A, $\sigma_1^2, \dots, \sigma_n^2$
+    \item By construction, $V$ contains the eigenvectors of $A^TA$ and $U$ contains the eigenvectors of $AA^T$, so $A^TAv_i = \sigma_i^2v_i$ and $AA^Tu_i = \sigma_i^2u_i$
+    \item \textbf{Condition number}, $\kappa(A) = $\norm{A}{2}$\norm{A^{-1}}{2} = \frac{\sigma_1}{\sigma_n}$
+\end{itemize}
+
+% ERROR ANALYSIS
+\section{Error analysis}
+\subsection{Floating point arithmetic}
+General floating point number equation: $\pm (\sum_{i=1}^{t-1} d_i\beta{^{-i})\beta^e$\\
+Where $\beta$ is the base (in floating point computation, $\beta=2$). $d_0\geq1$, and $d_i\leq \beta - 1$. $e$ is called the \textbf{exponent}, this is the location of the decimal place. $t-1$ in the summand is called the \textbf{precision} and indicates the number of digits (in base $\beta$) that can be stored with the number. The part of the equation in the parenthesis is referred to as the \textbf{significand} or \textbf{mantissa}
+
+
+% UNIT ROUNDOFF
+\subsection{Unit roundoff}
+The \textbf{unit roundoff} for a floating-point number is 
+\begin{equation*}
+    u = \frac{1}{2} \times \beta^{-(t-1)} \textrm{ (distance between the smallest digits stored in a floating-point number)}
+\end{equation*}
+For double precision floating point numbers (64 bits) $u \approx 10^{-16}$\\
+The \textbf{floating point truncation operator}, $fl(a)$, takes as input $a$ and returns the nearest floating point, $fl(a)$. Observe
+\begin{equation*}
+    fl(a+b) = a+b + \epsilon(a+b), \; \abs{\epsilon} \leq u \textrm{, the unit roundoff}
+\end{equation*}
+
+% ERROR ANALYSIS
+\subsection{Forward/Backward error analysis}
+\textbf{Forward error analysis} The forward error is $\norm{\Tilde{f}(x) - f(x)}{p}$. i.e., What is the error in the solution computed with our algorithm?\\
+
+\textbf{Backward error analysis} is $\Tilde{E}$ such that $(A + \Tilde{E})\tilde{x} = b$. i.e., what is the problem that our algorithm actually solved? is regarded as \textit{backward stable} if $\norm{E}{p} \in O(u)$ \\
+
+The relative sensitivity of a problem is often called the \textbf{conditioning} of the problem. \textbf{Sensitivity:} $\frac{\norm{\Tilde{f}(x) - f(x)}{p}}{\norm{\Tilde{x} - x}{p}}$. \textbf{Relative sensitivity:} $\frac{\norm{\Tilde{f}(x) - f(x)}{p}\norm{x}{p}}{\norm{\Tilde{x} - x}{p}\norm{f(x)}{p}}$
+
+
+% LU FACTORIZATIONS
+\section{LU Factorization}
+Once we have $A=LU$, to solve $Ax=b$, we can start by solving $Lz=b$, and then $Ux=z$. $x$, here, is the solution!
+
+% BASIC ALGORITHM FOR LU FACTORIZATION
+\subsection{Basic algorithm}
+Iteratively subtracting the outer products of vectors that sequentially "zero-out" the rows and columns of $A$. $LU = l_1u_1^t + \dots + l_nu_n^t$. $LU - l_1u_1^t$ yields a matrix with zeros in the first row and column. We use this principle for the basic algorithm 
+\begin{itemize}
+    \item Construct $u_1^T$ equal to the first row of $A, a_1^T$
+    \item Construct $l_1$ equal to each of the elements in the first column of $A, a_1$, divided by $a_{11}$, the "pivot"
+    \item Calculate $A' \leftarrow A - l_1u_1^T$. In practice (and somewhat confusingly), $A'$ is now referred to as $A$
+    \item Repeat the algorithm with the updated $A$, and the next row/column. Observe each $l_i, u_i^T$ constructed are the rows/columns of the lower and upper triangular matrices of $L, U$ respectively.
+\end{itemize}
+
+% GAUSS TRANSFORMATIONS
+\subsubsection{Gauss transforms}
+Another way to think about the basic LU factorization algorithm is with Gauss transforms. \textbf{Guass transformation matrices} are linear transformations that zero out all entries below a certain entry. The columns of a Gauss transformation look like the values of $l_i$, where nonzero entries are divided by a pivot entry.
+
+% PIVOTING
+\subsection{Pivoting}
+\subsubsection{When pivoting is needed}
+$a_{kk}$, being nonzero if none of the $k \times k$ blocks of $A, \; A[1:k, 1:k],$ have a determinant of 0. \textbf{Proof by induction}:\\
+\textit{Case k=1:} 
+\begin{align*}
+    A_1 &= L_1U_1\\
+    det(A_1) &= det(L_1U_1)\\
+    det(A_1) &= det(L_1)det(U_1) \textrm{, by property of determinants}\\
+    det(A_1) &= det(U_1) \textrm{, since determinant of a triangular matrix is a product of the diagonals and the diagonal of $L_1$ are 1's}\\
+    det(A_1) &= a_{11} = u_{11} \rightarrow \textrm{so when determinant is not zero, we have a nonzero pivot}
+\end{align*}
+\textit{Case k=n:} assumed to be true\\
+\textit{Case k=n+1:} $det(A_{k+1}) = u_{11}*u_{22}*\dots*u_{kk}$ but we know $u_{ii} \neq 0$ for $i \leq k$ from induction step, so when determinant is not zero, we have pivot, $a_{k+1, k+1}$ nonzero. \\
+What's more, if the entries of $L$ are large (which occurs when entries in $A$ are really small and land on the pivot locations), then because of roundoff errors in a computer, this algorithm can generate errors.
+
+
+% PIVOTING ALGORITHMS
+\subsubsection{Pivoting algorithms}
+Pivoting algorithms pivot the iterative version of $A$ in each iteration to avoid the numerical issues identified above. \textbf{Partial/Row pivoting} performs row swaps for max remaining entry and solves $PA = LU$. \textbf{Full pivoting} performs row and column swaps and solves $PAQ^T = LU$. Full pivoting is \textbf{rank-revealing}. \textbf{Rook pivoting} performs row and column swaps for max of row/col.
+
+
+% CHOLESKY FACTORIZATION
+\subsection{Cholesky factorization}
+The Cholesky factorization is an LU factorization for Symmetric Positive Definite (SPD) matrices, where SPD matrix, $A = GG^T$, with $G$ lower triangular.\\
+\textbf{Intuition:} An SPD matrix, $A$, can be written of the form
+\begin{align*}
+    A &= \begin{bmatrix} a & C^T\\ C &  B \end{bmatrix} \textrm{where a is 1x1, C is n-1x1, and b is n-1xn-1}
+\end{align*}
+After the first step of the LU factorization, we have the following matrix product, $A = L_1U_1$
+\begin{align*}
+    \begin{bmatrix} a & C^T\\ C &  B \end{bmatrix} &= 
+    \begin{bmatrix} 1 & 0\\ C/a &  I \end{bmatrix} 
+    \begin{bmatrix} a & C^T\\ 0 & B - (1/a)CC^T \end{bmatrix}
+\end{align*}
+Notice since $A$ is symmetric, $B$ is also symmetric, so $B - (1/a)CC^T$ must by symmetric by construction. We are also guaranteed to have the pivot, $a$ in entry $(1,1)$ of $A$, to be strictly greater than zero since $A$ is SPD: $a = e_1^TAe_1 > 0$. Next, we can further decompose the second matrix to
+\begin{align*}
+    A &= \begin{bmatrix} 1 & 0\\ C/a &  I\end{bmatrix}
+    \begin{bmatrix} a & 0\\ 0 & B - (1/a)CC^T \end{bmatrix}
+    \begin{bmatrix} 1 & C^T/a\\ 0 & I \end{bmatrix}
+\end{align*}
+
+\noindent Using the fact that $A$ SPD $\Rightarrow B^TAB$ SPD for $B$ nonsingular, observe that matrix $\begin{bmatrix} 1 & 0\\ C/a &  I\end{bmatrix}$ is nonsingular so therefore the matrix $\begin{bmatrix} a & 0\\ 0 & B - (1/a)CC^T \end{bmatrix}$ must be SPD. Which also means the submatrix $B - (1/a)CC^T$ is SPD \\
+We can use induction to prove that the Cholesky factorization exists.
+\\ \\
+Continuing with this factorization, we get an equation of the form $A = LDL^T$ for $D$, diagonal, and $L$, lower triangular. It's common to rewrite $A = LDL^T$ in the form $A = GG^T$, where $G = LD^{\frac{1}{2}}$
+
+\subsubsection{Cholesky factorization is unique}
+By contradiction, suppose $A = GG^T = MM^T$ for $G \neq M$
+We know $G, M$ nonsingular (consider the determinants of the equation above) so
+\begin{align*}
+    GG^T &= MM^T\\
+    I &= G^{-1}MM^TG^{-T}\\
+    I &= (G^{-1}M)(G^{-1}M)^T \textrm{, since} (A^{-1})^T = (A^T)^{-1}\\
+    (G^{-1}M)^{-T} &= (G^{-1}M)\\ \Rightarrow G^{-1}M & \textrm{ diagonal since } G^{-1}M \textrm{ lower triangular and } (G^{-1}M)^{-T} \textrm{ upper triangular}\\
+    \Rightarrow G^{-1}M &= D \Rightarrow M = GD\\
+    I &= (G^{-1}GD)(G^{-1}GD)^T\\
+    I &= DD^T = D^2 \Rightarrow \textrm{ so the entries of D are on the order of 1}
+\end{align*}
+
+% SCHUR COMPLEMENT
+\subsection{Schur complement}
+Observe $A$ can be written in the following form $A = \begin{bmatrix} A_{11} & A_{12}\\ A_{21} & A_{22}\end{bmatrix}$. If we run the LU factorization algorithm for $k$ steps, the resulting $A' = A$ is equal to $A = \begin{bmatrix} I & 0\\ A_{21}A_{11}^{-1} & I\end{bmatrix} \begin{bmatrix} A_{11} & 0\\ 0 & A_{22} - A_{21}A_{11}^{-1}A_{12}\end{bmatrix} \begin{bmatrix} I & A_{21}A_{11}^{-1}\\ 0 & I\end{bmatrix}$\\
+The bottom-right block of $A'=A, A_{22}' = A_{22}$ is equal to $A_{22} - A_{21}A_{11}^{-1}A_{12}$ from the original matrix. This is called the \textbf{Schur complement} of $A$
+
+\subsubsection{Schur complement derivation}
+At any step in the LU factorization, $A$ can be written in the form $A = \begin{bmatrix} A_{11} & A_{12}\\ A_{21} & A_{22}\end{bmatrix} = \begin{bmatrix} L_{11} & 0\\ L_{21} & L_{22}\end{bmatrix} \begin{bmatrix} U_{11} & U_{12}\\ 0 & U_{22}\end{bmatrix}$\\ 
+From this equality, we can create a system of equations and derive $A_{22} - A_{21}A_{11}^{-1}A_{12} &= L_{22}U_{22}$. Last, show that $A_{22}'$ in the LU factorization is equal to $A_{22} - L_{21}U_{12}$ since at each step we're subtracting $l_iU_i^T$, which can be stored as the nonzero rows/columns of $L_{21}U_{12}$.
+
+% QR FACTORIZATION
+\section{QR factorization}
+The QR factorization decomposes a matrix, $A \in \mathbb{R}^{m \times n}, m \geq n$ into an orthogonal (orthonormal) matrix, $Q$ and an upper triangular matrix, $R$. Recall $Q \in \mathbb{R}$, orthogonal, $Q^TQ = I$. QR factorization can take two forms when $A$ skinny. $Q \in \mathbb{R}^{m \times m}$ can be square and $R \in \mathbb{R}^{m \times n}$ can be skinny. Or $Q \in \mathbb{R}^{m \times n}$ can be skinny and $R \in \mathbb{R}^{n \times n}$ can be square.
+
+% UNIQUENESS
+\subsection{The QR factorization is unique}
+\textbf{Proof} that the QR factorization is unique for full rank matrix, $A$:
+\begin{align*}
+    A &= QR \Rightarrow Q^TA = R \Rightarrow R^TQ^TA = R^TR \Rightarrow (QR)^TA = R^TR \Rightarrow A^TA = R^TR
+\end{align*}
+So $A^TA$ can be written as $R^TR$, which is the structure of the Cholesky factorization. Suffice to show that $A^TA$ is Symmetric and Positive Definite. 
+\begin{align*}
+    \textrm{Symmetric: }& (A^TA)^T = A^TA\\
+    \textrm{Positive definite: for }& x\neq 0,\\
+    & x^TA^TAx = (Ax)^T(Ax) =(QRx)^T(QRx) = x^TR^TQ^TQRx =(Rx)^T(Rx)\\
+    & \textrm{Rx is of the form } Rx = \begin{bmatrix} r_{11}x_1 \\ r_{12}x_1 + r_{22}x_2 \\ \vdots \\ \sum_{i=1}^n r_{in}x_i\end{bmatrix} \textrm{, so } (Rx)^T(Rx) = \sum_{i=1}^n (\sum_{j \leq i} r_{ij}x_j)^2\\
+    &\textrm{So, } (Rx)^T(Rx) >0 \textrm{ for } x \neq 0
+\end{align*}
+
+% HOUSEHOLDER REFLECTION
+\subsection{Householder reflection}
+Construct $Q^T$ for each column in $A$ that projects it onto a corresponding column of $R$. Start with $a_1$ and find $Q_1^T$ such that $Q_1^Ta_1 = r_1$, where $r_1 = \pm \norm{a_1}{2}e_1$ (since $Q^T$ is orthogonal)\\
+\noindent \textbf{The key} to the iterative part of the algorithm is to construct $Q_i^T, i > 1$ with an identity matrix in the upper-left $i-1 \times i-1$ quadrant, and a smaller $Q^*_i^T$ in the lower right $n-i \times n-i$ quadrant, filling the remaining sections of the matrix with $0$'s
+
+\subsubsection{Constructing the Householder reflection permutation}
+\noindent The \textbf{Householder reflection} maps $a \rightarrow \norm{a}{2}e_1$ with $P = I - \beta vv^T \textrm{, where $v = a - \norm{a}{2}e_1$, and $\beta = 2/v^Tv$}$
+\begin{itemize}
+    \item Multiplying $Px$ is the same as taking the vector $x$ and subtracting $\frac{2vv^T}{v^Tv}x$ from it, where $\frac{2vv^T}{v^Tv}x$ is twice the projection of $x$ onto $v$.
+    \item In householder reflection, $a + \norm{a}{2}e_1$ is the line of reflection. Perpendicular to this line is $a - \norm{a}{2}e_1$, the line of reflection
+\end{itemize}
+
+\noindent \textbf{Aside:} The fixed points of a reflection, $P$, are the points that remain unchanged when multiplied by the reflection, $Px=x$. Geometrically, these are the points that are \textit{orthogonal} to the vector $v$ defining the reflection (i.e., $v^Tx=0$)
+
+
+% GIVENS TRANSFORMATION
+\subsection{Givens transformation}
+The Givens transformation is a precise, higher-cost QR factorization. A \textbf{Givens rotation} rotates $u = (u_1, u_2)^T$ to $\norm{u}{2}e_1$. The matrix that does this, $G^T$, is defined by $G^T = \begin{bmatrix} c & -s \\ s & c \end{bmatrix}, c = \frac{u_1}{\norm{u}{2}}, s = -\frac{u_2}{\norm{u}{2}}$. \\
+A full matrix, $P_i$, can be constructed to only contain this targeted transformation. Sequentially, the $P_i$'s can multiply $A$ to arrive at $R$
+
+% GRAM-SCHMIDT TRANSFORMATION
+\subsection{Gram-Schmidt transformation}
+When $A \in \mathbb{R}^{m\times n}$ is tall and thin. The \textbf{Gram-Schmidt Transformation} starts with the property that $A=QR$ can be written as a sum of the outer products of the columns of $Q$ and rows of $R$: $A = QR = q_1r_1^T + \dots q_mr_m^T$. 
+\begin{align*}
+    r_{11} &= \norm{a_1}{2} \textrm{, since } \norm{a_1}{2} = \norm{q_1r_{11}}{2} \textrm{ and $q_i$ orthogonal}\\
+    q_1 &= \frac{1}{r_{11}}a_1\textrm{, since } a_1 = q_1r_{11} \textrm{ by construction of } QR \\
+    r_{1j} &= q_1^Ta_j \textrm{, (repeat for all $j$) since }\\
+    (a_j &= q_1r_{1j} + \dots + q_jr_{jj})\\
+    (q_1^Ta_j &= q_1^Tq_1r_{1j} + \dots + q_1^Tq_jr_{jj})\\
+    (q_1^Ta_j &= r_{1j}) \textrm{, since $q_i$ orthonormal}\\
+    A' &= A - q_1r_1^T \textrm{Repeat for $A'$}\\
+\end{align*}
+
+
+% LEAST SQUARES
+\subsection{QR factorization to solve least-squares problems}
+When $A$ is tall and thin, unlikely that we get a solution to $Ax = b$. Instead, we solve $argmin_x\norm{Ax - b}{2}$. 
+
+% NORMAL EQUATIONS
+\subsubsection{Method of normal equations}
+Assuming $A$ full rank. $x$ which solves $argmin_x\norm{Ax - b}{2}$ when $b-Ax$ is orthogonal to the range of $A$.
+\begin{align*}
+    \textrm{Want: } (b-Ax) &\perp \{z \vert z = Ay\}\\
+    (b-Ax) &\perp range(A) \Rightarrow (b-Ax) \perp a_i, \forall i \in A\\
+    a_1^T(b-Ax) &= 0, \forall i \in A \Rightarrow A^T(b-Ax) = 0 \Rightarrow x = (A^TA)^{-1}A^Tb
+\end{align*}
+Method can run into issues when A is poorly conditioned. Notice, condition number of $A^TA, \kappa(A^TA) = \kappa(A)^2$. 
+
+% QR METHOD FOR LEAST SQUARES
+\subsubsection{QR method for least squares}
+Assuming $A$ full rank. The QR method for least squares attempts to address the issue of poor conditioning.
+\begin{align*}
+    A^T(Ax-b) &= 0 \Rightarrow R^TQ^T(Ax-b) = 0\\
+    Q^T(Ax-b) &= 0 \textrm{, since we assume $A, R$ full rank (multiply both sides by $R^{-T}$})\\
+    Q^TQRx-Q^Tb &= 0 \Rightarrow Rx &= Q^Tb \Rightarrow x = R^{-1}Q^Tb
+\end{align*}
+
+% SVD FOR RANK-DEFICIENT A
+\subsubsection{SVD for rank-deficient A}
+When A not full rank.  Add the additional criteria $\min_x \norm{x}{2}$. Solve using thin SVD. 
+\begin{align*}
+    (Ax-b) &\perp range(U) \textrm{, since $R(A) = R(U)$ for $A=U\Sigma V^T$}\\
+    U^T(Ax-b) &= 0 \Rightarrow U^T(U\Sigma V^Tx - b) = 0 \Rightarrow \Sigma V^Tx = U^Tb\\ 
+    x &= V\Sigma^{-1}U^Tb
+\end{align*}
+$\min_x \norm{x}{2}$ the $x \perp N(A)$, the shortest vector between $N(A)$ and the vector/plane of solutions to $argmin_x\norm{Ax - b}{2}$. This value it turns out must be in $R(V)$ since $R(V) = N(A)^\perp$
+% TODO -- pseudocode
+
+\end{document}
