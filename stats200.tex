@@ -28,19 +28,43 @@
 
 % YOU ARE ON PAGE 49 OF THE NOTES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 % COMBINATORICS AND PROBABILITY REVIEW
-\section{Combinatorics and probability review}
-\subsection{Counting}
+\section{Review: Combinatorics and probability}
+%Logs, derivatives, integration, taylor expansions
+\subsection{Calculus cheat sheet}
+\subsubsection{Logs}
+\begin{itemize}
+	\item $log_b(M * N) = Lob_bM + log_bN$
+	\item $log_b(\frac{M}{N}) = log_bM - log_bN$
+	\item $log_b(M^k) = klog_bM$
+	\item $e^ne^m = e^{n+m}$
+\end{itemize}
+\subsubsection{Derivatives}
+\begin{itemize}
+	\item $(x^n)' = nx^{n-1}$
+	\item $(e^x)' = e^x$
+	\item $(e^{u(x)})' = u'(x)e^x$
+	\item $(log_e(x))' = (lnx)' = \frac{1}{x}$
+	\item $(f(g(x)))' = f'(g(x))g'(x)$
+\end{itemize}
+\subsubsection{Integrals}
+\begin{itemize}
+	\item TODO: Integration by parts
+\end{itemize}
+\subsubsection{Infinite series and sums}
+\begin{itemize}
+	\item $e^x = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \dots = \sum_{n=0}^\infty \frac{x^n}{n!}$
+	\item $\frac{1}{1-x} = 1 + x + x^2 + x^3 + \dots = \sum_{n=0}^\infty a^x$ for $\abs{x} < 1$
+	\item $ln(1 + x) = 1 - x + \frac{x^2}{2} - \frac{x^3}{3} + \dots = \sum_{n=0}^\infty (-1)^n\frac{x^n}{n}$
+	\item $(1 + \frac{a}{n})^n \longrightarrow e^a$
+\end{itemize}
 
 % EVENTS AND SETS
 \subsection{Events and sets}
 Set operations follow commutative, associative, and distributive laws:
 \begin{itemize}
-    \item $E \cup F = F \cup E$
-    \item $E\cap F = F \cap E $ (also written $EF = FE$)
-    \item $(E\cup F)\cup G = E \cup (f\cup G)$
-    \item $(E\cap F)\cap G = E\cap(F\cap G)$
-    \item $(E\cup F)\cap G = (E\cap G) \cup (F \cap G) = E\cap G \cup F \cap G$
-    \item $E\cap F\cup G = (E\cup G) \cap (F \cup G) = E\cup G \cap F \cup G$
+    \item Commutative: $E \cup F = F \cup E$ and $E\cap F = F \cap E $ (also written $EF = FE$)
+    \item Associative: $(E\cup F)\cup G = E \cup (f\cup G)$ and $(E\cap F)\cap G = E\cap(F\cap G)$
+    \item Distributive: $(E\cup F)\cap G = (E\cap G) \cup (F \cap G) = E\cap G \cup F \cap G$ and $E\cap F\cup G = (E\cup G) \cap (F \cup G) = E\cup G \cap F \cup G$
 \end{itemize}
 \textbf{DeMorgan's Laws} relate the complement of a union to the intersection of complements:
 \begin{itemize}
@@ -62,11 +86,18 @@ A \textbf{$\theta$-field} is a collection of subsets $\mathcal{E} \subset S$ tha
     \item $E \in \mathcal{E} \Rightarrow E^C \in \mathcal{E}$
     \item $E_i \in \mathcal{E}$ for {$1, 2, \dots$} $\Rightarrow \cup_{i=1}^\infty E_i \in \mathcal{E}$
 \end{itemize}
-The \textbf{law of total probability} relates marginal probabilities to conditional probabilities. For a partition, {$E_1, E_2, \dots$} of set, $S$
+\textbf{Basic probability properties}
+\begin{itemize}
+	\item $P(A^C)=1 - P(A)$
+	\item $P(0)=0$
+	\item $A\subset B \longrightarrow P(A) \leq P(B)$
+	\item $P(A \cup B)=P(A)+P(B) - P(A \cap B)$ 
+\end{itemize}
+The \textbf{law of total probability} relates marginal probabilities to conditional probabilities. For a partition, {$E_1, E_2, \dots$} of set, $S$, where a partition implies i) $E_i, E_j$ are pairwise disjoint and ii) $\cup_{i=1}^\infty E_i = S$, then
 \begin{equation*}
-     P(A) = \sum_{i=1}^\infty P(A\cap E_i)
+     P(A) = \sum_{i=1}^\infty P(A\cap E_i) = \sum_{i=1}^\infty P(A \mid E_i) P(E_i)
 \end{equation*}
-Where a partition implies i) $E_i, E_j$ are pairwise disjoint and ii) $\cup_{i=1}^\infty E_i = S$
+
 
 \noindent The \textbf{continuity of probability measures} state
 \begin{align*}
@@ -97,89 +128,85 @@ It is possible for events to be pairwise independent, but not mutually independe
     \{ \omega \in S : X(\omega) \leq t \} \in \mathcal{E}
 \end{equation*}
 For example, if coin tosses produce a sample space of {Heads, Tails}, a random variable can be the number of heads. 
-\subsection{Expected value}
-The expected value (or mean) of a discrete random variable, $X$, is
-\begin{equation*}
-    E(X) = \sum_x xP(X=x)
-\end{equation*}
-Which can also be written as
-\begin{align*}
-    E(X) &= \sum_{x \in S} X(s)p(s) \textrm{, where $p(s)$ is the probability that element $s \in S$ occurs:}\\
-    \textrm{Proof:}&\\
-    E(X) &= \sum_i x_iP(X=x_i) \textrm{, for } E_i = \{X = x_i\} = \{s \in S : X(s) = x_i\}\\
-    &= \sum_i x_i \sum_{s\in E_i} p(s) = \sum_i \sum_{s\in E_i} x_i p(s)\\
-    &= \sum_i \sum_{s\in E_i} X(s) p(s) = \sum_{s\in S} x_i p(s)
-\end{align*}
-This latter equation structure helps build intuition about the linearity of the expected value function and allows us to derive several other properties of expected values. In the general case:
-\begin{align*}
-    E(g(X)) &= \sum_i g(x_i)p_X(x_i) \textrm{, assuming } g(x_i) = y_i\\
-    \textrm{Proof:}&\\
-    \sum_i g(x_i)p_X(x_i) &= \sum_j \sum_{i:g(x_i)=y_j} g(x_i) p_X(x_i) = \sum_j \sum_{i:g(x_i)=y_j} y_j p_X(x_i) \\
-    &= \sum_j y_j \sum_{i:g(x_i)=y_j} p_X(x_i) = \sum_j y_j P(g(X) = x_i)\\
-    &= E(g(X))
-\end{align*}
-And from this general equation we can get two key properties of the expected value:
-\begin{align*}
-    (i) \; & E(aX + b) = aE(X) + b\\
-    & E(aX + b) = \sum_{x\in S} (aX(s) + b) p(s) = a\sum_{s\in S}X(s)p(s) + \sum_{s\in S}bp(s) = aE(X) + b\\ \\
-    (ii) \; & E(X + Y) = E(X) + E(Y)\\
-    & E(X + Y) = \sum_{s \in S} (X(s) + Y(s))p(s) = \sum_{s \in S} X(s)p(s) + \sum_{s \in S} Y(s)p(s) = E(X) + E(Y)
-\end{align*}
-\subsection{Variance, covariance, and correlation}
-The \textbf{variance} of X is defined in relation to $E(X) = \mu$ as the expected value of the squared difference between the random variable the mean. The standard deviation, $\sigma$ is defined as the square root of the variance.
-\begin{align*}
-    Var(X) &= E((X - \mu)^2) = \sigma^2\\
-    SD &= \sqrt{Var(X)} = \sqrt{\sigma^2} = \sigma
-\end{align*}
-Several properties of variance follow from linearity of expectation:
-\begin{align*}
-    (i) \; & Var(X) = E(X^2) - \mu^2\\
-    & Var(X) = E((X - \mu)^2) = E(X^2 - 2X\mu + \mu^2) = E(X^2 - 2\mu X + \mu^2) \\
-    & Var(X) = E(X^2) - 2\mu^2 + \mu^2 = E(X^2) - \mu^2\\ \\
-    (ii) \; & Var(aX+b) = a^2Var(X) \\
-    & Var(aX + b) = E((aX + b)^2) - E(aX + b)^2 = E(a^2X^2 + 2abX + b^2) - (aE(X)+b)^2\\
-    & Var(aX + b) =a^2E(X^2) + 2abE(X) + b^2 - a^2E(X)^2 - 2abE(X) - b^2 = a^2E(X^2) - a^2E(X)^2 = a^2(E(X^2) - E(X)^2)
-\end{align*}
-
 
 % DISTRIBUTION FUNCTIONS
-\section{Distribution functions}
-\subsection{Probability mass functions}
+\subsection{Discrete distribution functions}
+\subsubsection{Bernoulli}
+\textbf{Probability mass function ($Bernouli(p)$):} TODO
+\begin{align*}
+    P(X) = p^x(1-p)^{1-x}
+\end{align*}
+\textbf{Expected value:} $p$
+\textbf{Variance:} $p(1-p)$
+
 \subsubsection{Binomial distribution}
 \textbf{Probability mass function ($Bin(n,p)$):} For random variable $X$, the number of successes in $n$ trials, the probability of observing $j$ successes where each success has probability $p$ is
-\begin{align*}
-    P(X = j) = {n \choose j}p^j(1-p)^{n-j}
-\end{align*}
-\textbf{Expected value:}
-\textbf{Variance:}
+\begin{equation*}
+    P(X = j) = {n \choose j} p^j (1 - p)^{n-j}
+\end{equation*}
+\textbf{Expected value:} $np$
+\textbf{Variance:} $np(1-p)$
 
 \subsubsection{Geometric distribution}
 \textbf{Probability mass function ($Geom(p)$):} For random variable $X$, the number of trials until the first success (included) with probability $p$ is
 \begin{equation*}
     P(X=j) = (1-p)^{j-1}p
 \end{equation*}
-\textbf{Expected value:}
-\textbf{Variance:}
+\textbf{Expected value:} $\frac{1}{p}$
+\textbf{Variance:} $\frac{1-p}{p}$
 
 \subsubsection{Negative binomial}
-\textbf{Probability mass function ($Geom(p)$):}
-\textbf{Expected value:}
-\textbf{Variance:}
+\textbf{Probability mass function ($NB(r, p)$):} TODO
+\begin{equation*}
+	P(X = j) = {k + r - 1 \choose k} (1-p)^rp^k
+\end{equation*}
+\textbf{Expected value:} $\frac{pr}{1-p}$
+\textbf{Variance:} $\frac{pr}{(1 - p)^2}$
 
-\subsection{Probability density function and cumulative distribution functions}
-\subsubsection{Normal distribution}
-\textbf{Probability mass function ():}
-\textbf{Expected value:}
-\textbf{Variance:}
-\subsubsection{Exponential distribution}
-\textbf{Probability mass function ():}
-\textbf{Expected value:}
-\textbf{Variance:}
 \subsubsection{Poisson distribution}
-\textbf{Probability mass function ():}
-\textbf{Expected value:}
-\textbf{Variance:}
+\textbf{Probability mass function ($Pois(\lambda)$):} TODO
+\begin{equation*}
+	\frac{\lambda^ke^{-\lambda}}{k!}
+\end{equation*}
+\textbf{Expected value:} $\lambda$
+\textbf{Variance:} $\lambda$
+
+\subsubsection{Hypergeometric distribution}
+\textbf{Probability mass function ($todo$):} TODO
+\begin{equation*}
+\end{equation*}
+\textbf{Expected value:} $todo$
+\textbf{Variance:} $todo$
+
+
+\subsection{Continuous distribution functions}
+\subsubsection{Uniform distribution}
+\textbf{Probability density function ($todo$):}
+\begin{equation*}
+\end{equation*}
+\textbf{Expected value:} $todo$
+\textbf{Variance:} $todo$
+
+\subsubsection{Normal distribution}
+\textbf{Probability density function ($todo$):}
+\begin{equation*}
+\end{equation*}
+\textbf{Expected value:} $todo$
+\textbf{Variance:} $todo$
+
+\subsubsection{Exponential distribution}
+\textbf{Probability density function ($todo$):}
+\begin{equation*}
+\end{equation*}
+\textbf{Expected value:} $todo$
+\textbf{Variance:} $todo$
+
 \subsubsection{Gamma distribution}
+\textbf{Probability density function ($todo$):}
+\begin{equation*}
+\end{equation*}
+\textbf{Expected value:} $todo$
+\textbf{Variance:} $todo$
 
 % MARGINAL, JOINT, AND CONDITIONAL DISTRIBUTIONS
 \section{Marginal, joint, and conditional distributions}
@@ -242,18 +269,117 @@ We can use conditional probabilities to restate the \textbf{law of total probabi
     P(E) = \int_{-\infty}^\infty P(E \mid X=x)f(x)dx
 \end{equation*}
 
+
+
+
+%EXPECTED VARIABLES
+\section{Expected variables}
+\subsection{Expected value}
+The expected value (or mean) of a discrete random variable, $X$, is
+\begin{equation*}
+    E(X) = \sum_x xP(X=x)
+\end{equation*}
+Which can also be written as
+\begin{align*}
+    E(X) &= \sum_{x \in S} X(s)p(s) \textrm{, where $p(s)$ is the probability that element $s \in S$ occurs:}\\
+    \textrm{Proof:}&\\
+    E(X) &= \sum_i x_iP(X=x_i) \textrm{, for } E_i = \{X = x_i\} = \{s \in S : X(s) = x_i\}\\
+    &= \sum_i x_i \sum_{s\in E_i} p(s) = \sum_i \sum_{s\in E_i} x_i p(s)\\
+    &= \sum_i \sum_{s\in E_i} X(s) p(s) = \sum_{s\in S} x_i p(s)
+\end{align*}
+This latter equation structure helps build intuition about the linearity of the expected value function and allows us to derive several other properties of expected values. In the general case:
+\begin{align*}
+    E(g(X)) &= \sum_i g(x_i)p_X(x_i) \textrm{, assuming } g(x_i) = y_i\\
+    \textrm{Proof:}&\\
+    \sum_i g(x_i)p_X(x_i) &= \sum_j \sum_{i:g(x_i)=y_j} g(x_i) p_X(x_i) = \sum_j \sum_{i:g(x_i)=y_j} y_j p_X(x_i) \\
+    &= \sum_j y_j \sum_{i:g(x_i)=y_j} p_X(x_i) = \sum_j y_j P(g(X) = x_i)\\
+    &= E(g(X))
+\end{align*}
+And from this general equation we can get two key properties of the expected value:
+\begin{align*}
+    (i) \; & E(aX + b) = aE(X) + b\\
+    & E(aX + b) = \sum_{x\in S} (aX(s) + b) p(s) = a\sum_{s\in S}X(s)p(s) + \sum_{s\in S}bp(s) = aE(X) + b\\ \\
+    (ii) \; & E(X + Y) = E(X) + E(Y)\\
+    & E(X + Y) = \sum_{s \in S} (X(s) + Y(s))p(s) = \sum_{s \in S} X(s)p(s) + \sum_{s \in S} Y(s)p(s) = E(X) + E(Y)
+\end{align*}
+
+
+\section{Variance, covariance, and correlation}
+The \textbf{variance} of X is defined in relation to $E(X) = \mu$ as the expected value of the squared difference between the random variable the mean. The standard deviation, $\sigma$ is defined as the square root of the variance.
+\begin{align*}
+    Var(X) &= E((X - \mu)^2) = \sigma^2\\
+    SD &= \sqrt{Var(X)} = \sqrt{\sigma^2} = \sigma
+\end{align*}
+Several properties of variance follow from linearity of expectation:
+\begin{align*}
+    (i) \; & Var(X) = E(X^2) - \mu^2\\
+    & Var(X) = E((X - \mu)^2) = E(X^2 - 2X\mu + \mu^2) = E(X^2 - 2\mu X + \mu^2) \\
+    & Var(X) = E(X^2) - 2\mu^2 + \mu^2 = E(X^2) - \mu^2\\ \\
+    (ii) \; & Var(aX+b) = a^2Var(X) \\
+    & Var(aX + b) = E((aX + b)^2) - E(aX + b)^2 = E(a^2X^2 + 2abX + b^2) - (aE(X)+b)^2\\
+    & Var(aX + b) =a^2E(X^2) + 2abE(X) + b^2 - a^2E(X)^2 - 2abE(X) - b^2 = a^2E(X^2) - a^2E(X)^2 = a^2(E(X^2) - E(X)^2)
+\end{align*}
+
+
 % MOMENT GENERATING FUNCTIONS
 \section{Moment generating functions}
+The moment generating function of a random variable X is defined as 
+\begin{equation*}
+	M_X(t) = \mathbb{E}[e^{tX}] = \sum_{n=0}^\infty\frac{\mathbb{E}[X^n]}{n!}t^n
+\end{equation*}
+Notice its called a moment generating function because each derivative of this function can generate a new moment of $X$ at $t=0$:
+\begin{equation*}
+	M_X^{(n)}(0) = \mathbb{E}[X^n]
+\end{equation*}
+\subsection{Common MGF derivations}
 
-% CONVERGENCE
-\section{Convergence}
-\subsection{Vector products}
+% CONVERGENCE AND LIMIT THEOREMS
+\section{Convergence and limit theorems}
+\subsection{Convergence in probability}
+\subsection{Convergence in $L_p$}
+\subsection{Convergence in distribution}
 
-% CALCULUS REVIEW
-\section{Calculus review}
-\subsection{Infinite sums and series}
-\subsection{Integration}
-\subsection{Derivatives}
+\subsection{Law of large numbers}
+For $X_1, X_2, \dots, X_n$ a sequence of i.i.d. random variables with $E(X_i) = \mu$,  $Var(X_i) = \sigma^2$, $\overline{X}_n = \frac{1}{n}\sum_{I = 1}^n X_i$, then for any $\epsilon > 0$
+\begin{equation*}
+	P(\abs{\overline{X}_n - \mu} > \epsilon) \longrightarrow 0 \textrm{ as } n \rightarrow \infty
+\end{equation*}
+\textbf{Proof:}
+\begin{align*}
+	\textrm{First find $\mathbb{E}(\overline{X}_n)$ and $Var(\overline{X}_n)$} \\
+	& \mathbb{E}(\overline{X}_n) = \frac{1}{n}\sum_{I = 1}^n \mathbb{E}(X_i) = \mu \\
+	& Var(\overline{X}_n) = \frac{1}{n^2}\sum_{I = 1}^nVar(X_i) = \frac{\sigma^2}{n} \textrm{, since $X_i$ independent}
+\end{align*}
+The desired result now follows immediately from Chebyshev’s inequality, which states
+\begin{align*}
+	& P(\abs{\overline{X}_n - \mu} > \epsilon) \leq \frac{Var(\overline{X}_n)}{\epsilon^2} = \frac{\sigma^2}{n\epsilon^2} \rightarrow 0 \textrm{ as } n \rightarrow \infty
+\end{align*}
+
+\subsection{Central limit theorem}
+Most useful form of CLT:
+\begin{align*}
+	\sqrt{n}\frac{(\overline{X}_n - \mu)}{\sigma} &\longrightarrow N(0, 1)\\
+	\sqrt{n}(\overline{X}_n - \mu) &\longrightarrow N(0, \sigma^2)
+\end{align*}
+\textbf{More formal definition and proof:} For $X_1, X_2, \dots, X_n$ a sequence of i.i.d. random variables with $E(X_i) = 0$,  $Var(X_i) = \sigma^2$, and the common cumulative distribution function $F$ and moment-generating function $M$ defined in a neighborhood of zero. Then
+\begin{align*}
+	\textrm{For } S_n = \sum_{i=1}^nX_i\\
+	\lim_{n \rightarrow \infty}P(\frac{S_n}{\sigma \sqrt{n}} \leq x) = \Phi(x)
+\end{align*}
+\textbf{Proof:} Let $Z_n  = \frac{S_n}{\sigma \sqrt{n}}$. We show the MGF of $Z_n$ tends to the MGF of the standard normal distribution. Since $S_n$ is a sum of independent random variables,
+\begin{align*}
+	M_{S_n}(t) &= [M(t)]^n \textrm{ and } M_{Z_n}(t) = [M(\frac{t}{\sigma \sqrt{n}})]^n\\
+	\textrm{Reminder: } & \textrm{Taylor series expansion of } M(s) = M(0)+sM'(0)+ \frac{1}{2}sM''(0) + \epsilon_s \\
+	M(\frac{t}{\sigma\sqrt{n}}) &= 1 + \frac{1}{2}\sigma^2(\frac{t}{\sigma \sqrt{n}})^2 + \epsilon_n \textrm{ with } E(X) = M'(0) = 0, Var(X) = M''(0) = \sigma^2\\
+	M_{Z_n}(t) &= (1 + \frac{t^2}{2n} + \epsilon_n)^n\\
+	M_{Z_n}(t) &\longrightarrow e^{\frac{t^2}{2}} \textrm{ as } n \longrightarrow \infty \textrm{, by the infinite series convergence to $e^a$}
+\end{align*}
+Since $e^{\frac{t^2}{2}}$ is the MGF of the standard normal distribution, we have proven the central limit theorem.
+
+
+
+
+
 
 
 \end{document}
