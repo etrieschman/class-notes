@@ -15,13 +15,12 @@
 
 \newcommand{\userMarginInMm}{10}
 \geometry{
- legal,
+%  legal,
  left=\userMarginInMm mm,
  right=\userMarginInMm mm,
  top=\userMarginInMm mm,
  bottom=20mm,
- footskip=5mm
- }
+ footskip=5mm}
 
 
 %HEADERS
@@ -306,8 +305,7 @@ The singular values, $\sigma_i$ of $\Sigma$ are always $\geq0$. And by conventio
     \item The directions of the semi axes are denoted by unit vectors, $u_1, \dots, u_n$ called \textbf{left singular vectors} of $A$
     \item For each $u_i$ there is some unit vector $v_i$ so that $Av_i = \sigma_iu_i$. The vectors $v_1, \dots, v_n$ are called the \textbf{right singular vectors}
 \end{itemize}
-\\
-\textbf{Derivation:}\\
+\textbf{Derivation:}
 Observe $A^TA$ symmetric: $(A^TA)^T = A^TA$
 \begin{align*}
     A^TA \textrm{ symmetric} &\Rightarrow \exists \; Q \textrm{ orthogonal and } \Lambda \textrm{ diagonal matrix of $\lambda_i$ s.t., }\\
@@ -340,13 +338,13 @@ Observe $A^TA$ symmetric: $(A^TA)^T = A^TA$
 And a few properties and remarks of $A \in \mathbb{R}^{n\times m}$ SVD
 \begin{itemize}
     \item $\norm{A}{2} = \sigma_1$
-    \item $\norm{A^{-1}}{2} = \frac{1}{\sigma_n$} when $A$ nonsingular
+    \item $\norm{A^{-1}}{2} = \frac{1}{\sigma_n}$ when $A$ nonsingular
     \item $\norm{A}{F} = \sqrt{\sum_i^{min\{n,m\}}\sigma_i^2}$
     \item When $A$ symmetric, $\sigma_i = \abs{\lambda_i}$
     \item The eigenvalues of $A^TA$ and $AA^T$ are the squares of the singular values of A, $\sigma_1^2, \dots, \sigma_n^2$
     \item By construction, $V$ contains the eigenvectors of $A^TA$ and $U$ contains the eigenvectors of $AA^T$, so $A^TAv_i = \sigma_i^2v_i$ and $AA^Tu_i = \sigma_i^2u_i$
     \item When $A$ orthogonal, $\sigma_1 = \dots = \sigma_n = 1$
-    \item \textbf{Condition number}, $\kappa(A) = $\norm{A}{2}$\norm{A^{-1}}{2} = \frac{\sigma_1}{\sigma_n}$
+    \item \textbf{Condition number}, $\kappa(A) = \norm{A}{2}$, $\norm{A^{-1}}{2} = \frac{\sigma_1}{\sigma_n}$
 \end{itemize}
 
 % ERROR ANALYSIS
@@ -356,7 +354,7 @@ And a few properties and remarks of $A \in \mathbb{R}^{n\times m}$ SVD
 
 General floating point number equation:
 \begin{equation*}
-    \pm (\sum_{i=1}^{t-1} d_i\beta{^{-i})\beta^e
+    \pm (\sum_{i=1}^{t-1} d_i\beta^{-i})\beta^e
 \end{equation*}
 Where 
 \begin{itemize}
@@ -579,8 +577,8 @@ The high-level approach of the algorithm is to construct $Q^T$ for each column i
 \begin{itemize}
     \item Want $Q_1^T$ such that $Q_1^Ta_1 = r_1$, where $r_1 = \pm \norm{a_1}{2}e_1$ (since $Q^T$ is orthogonal)
     \item Put differently, want $Q_1^T$ that reflects $a_1$ onto $e_1$
-\end{itemize}\\
-\noindent \textbf{The key} to the iterative part of the algorithm is to construct $Q_i^T, i > 1$ with an identity matrix in the upper-left $i-1 \times i-1$ quadrant, and a smaller $Q^*_i^T$ in the lower right $n-i \times n-i$ quadrant, filling the remaining sections of the matrix with $0$'s
+\end{itemize}
+\textbf{The key} to the iterative part of the algorithm is to construct $Q_i^T, i > 1$ with an identity matrix in the upper-left $i-1 \times i-1$ quadrant, and a smaller $Q_i^{*T}$ in the lower right $n-i \times n-i$ quadrant, filling the remaining sections of the matrix with $0$'s.
 
 \subsubsection{Constructing the Householder reflection permutation}
 \noindent The \textbf{Householder reflection} maps $a \rightarrow \norm{a}{2}e_1$ with
@@ -671,6 +669,113 @@ We can use the "thin" version of the Singular Value Decomposition to solve this!
     x &= V\Sigma^{-1}U^Tb \textrm{ (the "thin" SVD here provides a nonsingular $\Sigma\in \mathbb{R}^{r \times r}$, so we can take the inverse}
 \end{align*}
 Observe $\min_x \norm{x}{2}$ the $x \perp N(A)$, the shortest vector between $N(A)$ and the vector/plane of solutions to $argmin_x\norm{Ax - b}{2}$. This value it turns out must be in $R(V)$ since $R(V) = N(A)^\perp$
-% TODO -- pseudocode
+
+\section{Iterative methods to find eigenvalues}
+\subsection{Power iteration}
+Given $\lambda_1 > \lambda_2 \geq \dots \geq \lambda_n \in \lambda(A)$, the \textbf{Power iteration} is a process for finding $\lambda_1$. The basic idea is to repeatedly multiply matrix $A$ times a vector (normalizing each time) and eventually the first eigenvalue and eigenvector will emerge. This process assumes $A$ is diagonalizable, meaning it can be written of the form $A = X\Lambda X^{-1}$.
+
+Reminder: for $A$ diagonalizable $\Longrightarrow A^k = X \Lambda^k X^{-1}$
+\begin{align*}
+    A^k &= \sum_{i = 1}^n \lambda_i^k x_i y_i^T \textrm{ where $Y = X^{-1}$}\\
+    A^k &\approx \lambda_1^kx_1y_1^T \textrm{ since } \lambda_1 > \lambda_2\\
+    A^kq &\approx \lambda_1^kx_1y_1^Tq = \lambda_1^k(y_1^Tq)x_1 \textrm{, since $y_1^Tq$ is a scalar. Observe } A^kq \tilde \parallel x_1
+\end{align*}
+This theory is implemented in practice with the following formula
+\begin{align*}
+    1. \;& q_0 \textrm{, vector chosen at random}\\
+    2. \;& z_k = Aq_k = A^kq_0 \textrm{, evaluating for convergence if } z_k \parallel q_k \rightarrow z_k^Tx_k = \sqrt{\norm{z}{2}\norm{x}{2}}\\
+    3. \;& q_{k+1} = \frac{z_k}{\norm{z_k}{2}} = \frac{A^kq_0}{\norm{A^kq_0}{2}} \approx (\frac{\lambda_1}{\abs{\lambda_1}})^kx_1
+\end{align*}
+Since $A^{k}q_0 = Aq_{k} \approx \lambda_1 x_1$, where $\norm{x_1}{2} = 1 \; (WLOG)$ and $q_k \parallel x_1$, we can solve for $\lambda$:
+\begin{align*}
+    Aq_k \approx \lambda_1 x_1 &\Longrightarrow Ax_1 \approx \lambda_1x_1 \Rightarrow x_1^HAx_1 \approx \lambda_1\\
+    \textrm{Convergence: } &O((\abs{\frac{\lambda_1}{\lambda_2}})^K) \textrm{, bounds the error since $\lambda_2$ is the second largest term.}
+\end{align*}
+
+
+\subsection{Inverse iteration}
+This process finds the eigenvector (and corresponding eigenvalue) of $A$ that is closest to the value $\mu$. The basic idea is to multiply matrix $(A - \mu I)^{-1}$ iteratively by a random vector, $z$, normalizing each time. Eventually, you will get the eigenvector for the eigenvalue closest to $\mu$.
+
+Observe $(A - \mu I)^{-1}$ has the same eigenvectors of $A$:
+\begin{align*}
+    (A - \mu I)^{-1}x &= \lambda x\\
+    x &= (A - \mu I)x = \lambda Ax - \lambda \mu x\\
+    \lambda Ax &= x + \lambda \mu x\\
+    Ax &= \frac{(1 + \lambda \mu)}{\lambda}x
+\end{align*}
+Performing the power iteration on $(A - \mu I)^{-1}$, the largest eigenvalue to emerge will be of the form $\frac{1}{\lambda_i - \mu}$, and we get
+\begin{align*}
+    (A - \mu I)^{-1k}q_0 &= (A - \mu I)^{-1}q_{k} \approx \lambda_i x_i \textrm{, where } \norm{x_i}{2} = 1 \; (WLOG) \textrm{ and } q_k \parallel x_i
+\end{align*}
+Since $x_i$ is also an eigenvalue of $A$, we can solve $x_i^HAx_i = \lambda_i$ for the $\lambda_i$ closest in magnitude to $\mu$.
+\textbf{Convergence: } $O((\abs{\frac{\lambda_i - \mu}{\lambda_j - \mu}})^k)$, where $\lambda_j$ is the next closest eigenvalue to $\mu$
+
+\subsection{Orthogonal iteration}
+This process finds all eigenvalues and eigenvectors of $A$ in a single iterative process. We arrive at the final result with three building blocks. First, we show how we can compute each $q_i$ to capture $\lambda_i$. Next, we justify a matrix decomposition (based on Schur) that allows us to reveal $Q$. And lastly, we combine these blocks to show how this can be done at the same time for all of $A$.
+
+First, consider how orthogonal columns could reveal subsequent eigenvalues. Assume we have used the power iteration to compute $q_1$. To get $q_2$
+\begin{align*}
+    A^k &= \lambda_1x_1y_1^T + \lambda_2x_2y_2^T + \dots\\
+    PA^k &= \lambda_1Px_1y_1^T + \lambda_2Px_2y_2^T + \dots \textrm{, where } P = I - x_1x_1^T\\
+    PA^k &= 0 + \lambda_2Px_2y_2^T + \dots \textrm{, since } Px_1 = Ix_1 - x_1x_1^Tx_1 = x_1 - x_1 = 0\\
+    PA &\textrm{ can now be used to apply the power iteration to to reveal $x_2$ and $\lambda_2$}
+\end{align*}
+The general process is:
+\begin{itemize}
+    \item Start with $\lambda_1, q_1$ from power iteration
+    \item Build $P_2$, projector orthogonal to $q_1$, use power iteration to reveal ($\lambda_2, q_2$)
+    \item Build $P_3$, projector orthogonal to $\{q_1, q_2\}$, use power iteration to reveal ($\lambda_3, q_3$)
+    \item Build $P_i$, projector orthogonal to $\{q_1, \dots, q_{i-1}\}$, use power iteration to reveal ($\lambda_i, q_1$)
+\end{itemize}
+Now, consider the QR decomposition of $X$:
+\begin{align*}
+    A &= X\Lambda X^{-1}\\
+    A &= QR \Lambda R^-1 Q^H\\
+    A &= QTQ^H \textrm{, where upper triangular } T = R\Lambda R^{-1}
+\end{align*}
+Observe, the last line is the Schur Decomposition, so
+\begin{itemize}
+    \item The eigenvalues of $A$ are on the diagonal of $T$
+    \item By construction, each column of $Q$ is projecting the corresponding column of $X$ onto a vector orthogonal the preceding ones
+    \item The span of the columns of $Q, span\{q_1, \dots, q_n\}$ will be equal to the span of the columns of $X$
+\end{itemize}
+The process for the \textbf{orthogonal iteration} is:
+\begin{align*}
+    1. \;& AQ_k \rightarrow Z \textrm{, where $k$ is the iteration and } Q_0 = I\\
+    2. \;& Z \rightarrow Q_{k+1}R_{k+1} \textrm{, the QR factorization of $Z$}\\
+    3. \;& \textrm{Repeat } AQ_{k+1} \rightarrow Z \textrm{ and eventually } Q_k \rightarrow Q \textrm{ revealing } A = QRTQ^H
+\end{align*}
+Note in each iteration we are calculating $Q_{k+1}^HAQ_k = R_{k+1} = T_{k+1}$ 
+
+\subsubsection{Reveal eigenvectors of $A$ from $T$}
+Motivation: $X = X\Lambda X^{-1}$ can be hard to calculate.
+\begin{align*}
+    A &= X\Lambda X^{-1} = QTQ^H \textrm{, where $X = QR$ and $T = R\Lambda R^{-1}$}\\
+    A &= QY\Lambda Y^{-1}Q^H \textrm{, where $T = Y \Lambda Y^{-1}$ is easier to compute}
+\end{align*}
+Focusing on $T = Y \Lambda Y^{-1}$, we know for some $\lambda_i$
+
+\subsubsection{Rate of convergence in orthogonal (and QR) iteration}
+TODO: (See 10/13 lecture)
+
+% QR ITERATION
+\subsection{QR iteration}
+The QR iteration builds directly on the framework of the orthogonal iteration. In orthogonal iteration, we compute
+\begin{equation*}
+    AQ_k = Z = Q_{k+1}R_{k+1} \Rightarrow Q_{k+1}^HAQ_k = R_{k+1} \textrm{, in which the eigenvalues of $A$ are emerging}
+\end{equation*} 
+In the QR iteration, we ask if we can go from $R_k$ to $R_{k+1}$ directly (call $R_i = T_i$ for clarity that $A = QTQ^H$). The process for the \textbf{QR iteration} is
+\begin{align*}
+    1. \;&\\
+    2. \;&\\
+\end{align*}
+
+\subsubsection{QR iteration on upper Hessenberg}
+\subsubsection{QR iteration with shift}
+\subsection{Finding eigenvalues of sparse matrices}
+\subsubsection{Arnoldi process}
+\subsubsection{Krylov spaces}
+\subsubsection{LXXX process}
+
 
 \end{document}
