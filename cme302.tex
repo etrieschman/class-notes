@@ -856,10 +856,100 @@ Upper Hessenberg symmetric matrices are Tri-diagonal matrices
     \end{itemize}
 \end{itemize}
 
+% TODO - BOOK CHAPTERS NOT COVERED IN LECTURE
+\subsection{Bulge chasing}
+\subsection{Fracis shifts}
 \section{Finding eigenvalues of sparse matrices}
+When matrix, $A$, is dense, we're typically limited to ~$10^4 - 10^5$ rows because of computing restrictions. We need different methods for dealing with sparse matrices. Define \textbf{a sparse matrix} as a matrix with the number of nonzero entries on the order of $O(1)$ (i.e., does not scale with matrix size).
+
+The main operation for reducing complexity is matrix-vector multiplication, $Ax = \sum_j a_{ij}x_j$, where you can skip all $a_{ij}$ when $a_{ij} = 0$. 
+
 \subsection{Arnoldi process}
+A similar process to \textit{Gram-Schmidt process for QR factorization}. The \textbf{Arnoldi process} is used to reveal the first $k$ eigenvalues of a sparse matrix. 
+
+Like Gram-Schmidt, where we use $Q$ to make $R$ where each subsequent column of $A$ is made orthogonal to all preceding columns, with Arnoldi process we start with equation $Q^HAQ = H \Longrightarrow AQ = QH$ and use $Q$ to make $H$ where each subsequent column of $AQ$ orthogonal to all preceeding columns. 
+
+The process follows:
+\begin{align*}
+    1. \; & \textrm{Begin with random } q_1 \in Q \textrm{, such that } \norm{q_1}{2} = 1\\ \\
+    \textrm{Iterate through each of the first } & k \textrm{ columns of $Q$ with }\\
+    2. \; & Aq_j = \sum_{k = 1}^{j+1} h_{kj}q_k \textrm{, observing } q_k^TAq_j = h_{kj} \textrm{ the projection of } Aq_j \textrm{ onto } q_k\\
+    3. \; & Aq_j = \sum_{k = 1}^{j} h_{kj}q_k + h_{j+1, j}q_{j+1}\\
+    4. \; & r = Aq_j - \sum_{k = 1}^{j} h_{kj}q_k = h_{j+1, j}q_{j+1} \textrm{, where only $r$ is unknown}\\
+    5. \;& \norm{q_{j+1}}{2} = 1 \Longrightarrow h_{j+1, j} = \norm{r}{2} \textrm{ and } q_{j+1} = \frac{r}{h_{j+1, j}}
+\end{align*}
+The output of this process is $k$ columns of $Q$ and the upper $k \times k$ block of upper Hessenberg matrix, $H$, which can be used in the QR iteration to reveal $k$ eigenvalues close to $\lambda(A)$.\textbf{Proof:}
+\begin{align*}
+    AQ &= QH \Longrightarrow AQ_k = Q_kH_k + h_{k+1,k}q_{k+1}e_k^T \textrm{, where } Q_k = Q[:, 1:k], H_k = [1:k, 1:k]\\
+    AQ_k &= Q_kX_k\Lambda_k X_k^{-1} + h_{k+1,k}q_{k+1}e_k^T, \textrm{, where } H_k = X_k\Lambda_k X_k^{-1} \textrm{ through QR iteration}\\
+    A(Q_kX_k) &= (Q_kX_k)\Lambda_k + h_{k+1,k}q_{k+1}x_k^T \textrm{, where } x_k^T \textrm{ is the $k^{th}$ column of } X
+\end{align*}
+And we get an equation where 
+\begin{itemize}
+    \item $\Lambda_k$ contains $k$ eigenvalues close to $\lambda_i \in \lambda(A)$
+    \item $(Q_kX_k)$ serve as eigenvectors for those eigenvalues
+    \item $h_{k+1,k}q_{k+1}x_k^T$ represents something like an error term
+\end{itemize}
+
+% KRYLOV SUBSPACES
 \subsection{Krylov spaces}
+A \textbf{Krylov subspace} is defined as a space of sparse Matrix-vector products:
+\begin{equation*}
+    K(A, q, k) = span\{q_1, Aq_1, A^2q_1, \dots, A^kq_1 \}
+\end{equation*}
+In general, Krylov spaces can be used approximate linear algebra problems of $A \in \mathbb{R}^{n \times n}$ in a $K(A, q_1, k) \in \mathbb{R}^{k \times k}$ space instead.
+
+\subsubsection{QR factorization of Krylov subspace contains $Q_k$ from Arnoldi}
+\textbf{Proof:} We show for $K_k = Q_kR_k$, that $R_k$ is upper triangular.
+\begin{align*}
+    \textrm{Want } Q^TK_k &= R_k \textrm{ upper triangular for } K_k = \begin{bmatrix}
+        \vline & \vline & & \vline \\ q_1 & Aq_1& \dots & A^kq_1 \\ \vline & \vline & & \vline \end{bmatrix}\\
+        Q^Tk_j &= Q^TA^{j-1}q_1 = Q^T Q H^{j-1} Q^T q_1 \textrm{, since } A^k = Q^T H^k Q\\
+        &= H^{j-1} Q^T q_1 = H^{j-1} e_1 \textrm{, since $Q$ orthogonal}\\
+        \Rightarrow r_j \in R_k &= h_1 \in H^{j-1} \textrm{, which has top $j$ rows nonzero}
+\end{align*}
+The last statement can be checked by iteratively checking the first column of $H^i$. Furthermore, this result indicates that $Q_k$ forms a basis for $K(A, q_1, k)$.
+
+\subsubsection{Arnoldi process generates a minimal polynomial}
+For vector $x \in K(A, q_1, k)$:
+\begin{align*}
+    x &= Q_ky = \sum_i y_i q_i \textrm{, since $Q_k$ forms a basis of Krylov space}\\
+    &= \sum_i z_iA^{i-1}q_1 = (\sum_i z_iA^{i-1})q_1\\
+    &= p_{k-1}(A)q_1 \textrm{, a polynomial of degree $k-1$}
+\end{align*}
+% TODO -- need to read the textbook
+
+
+% LANCZOS PROCESS FOR SYMMETRIC MATRICES
 \subsection{Lanczos process}
+The \textbf{Lanczos process} is a parallel process to the Arnoldi process, but for symmetric matrices. Reminder: A symmetric upper Hessenberg matrix, $T$ is tri-diagonal. Note this tri-diagonal matrix is of the form
+\begin{equation*}
+    T = \begin{bmatrix}
+        \alpha_1 & \beta_1 & 0\\
+        \beta_1 & \alpha_2 & \beta_2 \\
+        0 & \ddots & \ddots & \ddots
+    \end{bmatrix}
+\end{equation*}
+The process follows
+\begin{align*}
+    1. \;& \alpha_k = q_k^TAq_k \Longrightarrow \alpha_kq_k = Aq_k\\
+    2. \;& r_k = Aq_k - \beta_{k-1}q_{k-1} - \alpha_kq_k \Longrightarrow r_k = \beta_{k-1}q_{k-1} \textrm{, $r_k$ becomes the orthogonal part of $Aq_k$}\\
+    3. \;& \beta_k \textrm{PLACEHOLDER, NEED TO REVIEW TEXTBOOK}
+\end{align*}
+The orthogonalization in step 2 is reduced from $O(k)$ in Arnoldi to $O(1)$ in Lanczos because of the symmetry of $A$. Professor Darve notes the "magic" in this. 
+
+\subsubsection{Process for revealing the max eigenvalue of $A$}
+\begin{align*}
+    \lambda(T_k) &\approx \lambda(A)\\
+    \lambda_1 \in \lambda(T_k) &= \max_{x \neq 0} \frac{y^TQ_k^TAQy}{\norm{y}{2}^2} \textrm{, by property that } \lambda_1 \in \lambda(A) = \max_{x \neq 0} \frac{x^TAx}{\norm{x}{2}^2}\\
+    &\Longrightarrow \textrm{ want max $x$ of the form } Q_ky \\
+    &\Longrightarrow \textrm{ want max $x$ in Krylov space, a subspace of } \mathbb{R}^k\\
+    &\Longrightarrow \lambda_1 \in \lambda(T_k) \leq \lambda_1 \in \lambda(A) \textrm{, since it is the max in a smaller space} \\ \\
+    \lambda_1 \in \lambda(T_k) &= \max_{x \neq 0} \frac{q_1^Tp(A)Ap(A)q_1}{q_1^Tp(A)^2q_1} \textrm{, and see textbook for step from here to next step}\\
+    &\Longrightarrow \lambda_1 \in \lambda(T_k) \leq \lambda_1 - (\lambda_1-\lambda_n)(\frac{\tan(\theta)}{T_{k-1}^{Cheb}(1+2p_1)}) \textrm{, where } p_1 = \frac{\lambda_1 - \lambda_2}{\lambda_2 - \lambda_n}
+\end{align*}\
+Observe that the $RHS$ approaches $\lambda_1$ when $\lambda_1$ is well separated from the other eigenvalues. 
+
 
 
 \end{document}
