@@ -816,6 +816,46 @@ Each QR iteration step of a dense matrix is $O(n^3)$. To reduce flops (floating 
 \end{align*}
 
 \subsubsection{QR iteration with shift}
+Recall, convergence is dictated by $\abs{(\lambda_{i+1} / \lambda_i)}^k$. When $\lambda_{i+1}$ is close to $\lambda_i$, \textbf{QR iteration with shift} helps accelerate convergence. First observe for $\lambda_i \in \lambda(A) \rightarrow (\lambda_i - \mu) \in \lambda(A - \mu I)$. In this algorithm, at each step we shift $T_k$ by $\mu I$. For $\mu$ close to $\lambda_{i+1}$ close to $\lambda_i$, the resulting converence, $\abs{[(\lambda_{i+1} - \mu) / (\lambda_i - \mu)]}^k$ will be faster.
+
+In general, the \textbf{QR iteration with shift} process works by shifting the last eigenvalue (smallest in absolute value), updating the shift in each iteration. It works as follows:
+\begin{align*}
+    1. \;& \mu_k = T_k[n, n]\\
+    2. \;& (T_k - \mu_k I) \longrightarrow U_{k+1}R_{k+1} \textrm{, QR factorization of the shifted } T_k\\
+    3. \;& R_kU_k + \mu_k I \longrightarrow T_{k+1}\\
+    4. \;& \textrm{Repeat with } T_{k+1}
+\end{align*}
+Observe, this shift preserves the original QR iteration
+\begin{align*}
+    (T_k - \mu_ I) &= U_{k+1}R_{k+1} \Longrightarrow U_{k+1}^HT_k - \mu_k U_{k+1}^H = R_{k+1}\\
+    T_{k+1} &= R_{k+1}U_{k+1} + \mu_k I \Longrightarrow T_{k+1} = (U_{k+1}^HT_k - \mu_k U_{k+1}^H)U_{k+1} + \mu_k I\\
+    T_{k+1} &= U_{k+1}^HT_kU_{k+1} - \mu_k I + \mu_k I = U_{k+1}^HT_kU_{k+1}
+\end{align*}
+And lastly, another useful speed-up property is called \textbf{deflaction}, which is a process that allows us to break up the current QR iteration process into two smaller/easier problems.
+\begin{itemize}
+    \item If any sub-diagonal element of an upper Hessenberg matrix, $H$, is 0, it can be written as $H = \begin{bmatrix} H_{11} & H_{12} \\ 0 & H_{22} &\end{bmatrix}$ with $H_{11}$ and $H_{22}$ upper Hessenberg and $\lambda(H) = \lambda(H_{11})\cup \lambda(H_{22})$
+    \item Therefore, if when updating $T_k = R_kU_k + \mu_k I$, any sub-diagonal element of $T_k = 0$, then $T_k$ can be written in this form and the QR iteration can be performed on $(T_k)_{11}$ and $(T_k)_{22}$ separately (simpler  problems)
+\end{itemize}
+\textbf{Proof} of $\lambda(H) = \lambda(H_{11})\cup \lambda(H_{22})$
+% TODO
+
+\subsubsection{QR iteration on symmetric matrices}
+Upper Hessenberg symmetric matrices are Tri-diagonal matrices
+\begin{itemize}
+    \item Unsymmetric case complexity:
+    \begin{itemize}
+        \item Transform to upper Hessenberg: $O(n^3)$
+        \item QR iteration step: $O(n^2)$
+        \item Overall QR iteration: $O(pn^3)$, where $p$ is the number of iterations per eval (assume quadradic convergence)
+    \end{itemize}
+    \item Symmetric case complexity:
+    \begin{itemize}
+        \item Transform to upper Hessenberg: $O(n^3)$
+        \item QR iteration step: $O(n)$
+        \item Overall QR iteration: $O(pn^2)$, where $p$ is the number of iterations per eval (assume cubic convergence) 
+    \end{itemize}
+\end{itemize}
+
 \section{Finding eigenvalues of sparse matrices}
 \subsection{Arnoldi process}
 \subsection{Krylov spaces}
