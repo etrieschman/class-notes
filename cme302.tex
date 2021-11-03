@@ -814,8 +814,10 @@ Each QR iteration step of a dense matrix is $O(n^3)$. If we run for $O(n)$ itera
 \end{align*}
 
 \subsubsection{$H$ remains upper Hessenberg in QR iteration}
-PLACEHOLDER FOR PROOF THAT $H$ REMAINS UPPER HESSENBERG
+% TODO - PLACEHOLDER FOR PROOF THAT $H$ REMAINS UPPER HESSENBERG
 
+\subsubsection{Bulge chacing to create upper Hessenberg matrix}
+% TODO
 
 
 \subsection{QR iteration with shift}
@@ -855,7 +857,12 @@ The \textbf{Francis shift} is a way of selecting shifts based on the bottom-righ
     &= T^2 - (\mu + \overline{\mu})T + \abs{\mu}^2I \textrm{, where each component of the polynomial is} \in \mathbb{R}
 \end{align*}
 And from uniqueness of QR factorization, $(U_1U_2)$ must be real as well.
-With Francis shift, we define $M = T^2 - (\mu + \overline{\mu})T + \abs{\mu}^2I$
+
+With Francis shift, we 
+\begin{itemize}
+    \item Define $M = T^2 - (\mu + \overline{\mu})T + \abs{\mu}^2I$, noticing $m_1$ only has nonzero entries in the first three rows
+    \item Build $V = U_1U_2$ using bulge chasing starting with $P_1^Tm_1 = e_1$, noticing i) for $M = (U_1U_2)(R_2R_1)$ that $U_1U_2$ also has only has nonzero entries in the first three rows, ii) by implicit Q theorem $(U_1U_2)^TT(U_1U_2)$ is upper Hessenberg
+\end{itemize}
 
 \subsection{QR iteration with deflation}
 And lastly, another useful speed-up property is called \textbf{deflation}, which is a process that allows us to break up the current QR iteration process into two smaller/easier problems.
@@ -865,6 +872,7 @@ And lastly, another useful speed-up property is called \textbf{deflation}, which
 \end{itemize}
 \textbf{Proof} of $\lambda(H) = \lambda(H_{11})\cup \lambda(H_{22})$
 % TODO
+
 \textbf{Theorem:} If $T$ is unreduced upper Hessenberg, then in QR factorization, $T=QR$, the last row of $R$ is zero.
 %TODO
 
