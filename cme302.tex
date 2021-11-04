@@ -226,6 +226,7 @@ The \textbf{geometric multiplicity} of an eigenvalue, $\lambda_i$, is the dimens
 Other eigenvalue properties
 \begin{itemize}
     \item $\lambda(A) = \lambda(A^T)$
+    \item Courant-Fischer minmax theorem: $\lambda_1 = \max_{x \neq 0}\frac{x^TAx}{\norm{x}{2}^2}$
 \end{itemize}
 
 % DETERMINANTS/TRACE
@@ -670,6 +671,8 @@ We can use the "thin" version of the Singular Value Decomposition to solve this!
 \end{align*}
 Observe $\min_x \norm{x}{2}$ the $x \perp N(A)$, the shortest vector between $N(A)$ and the vector/plane of solutions to $argmin_x\norm{Ax - b}{2}$. This value it turns out must be in $R(V)$ since $R(V) = N(A)^\perp$
 
+
+% ITERATIVE METHODS FOR EIGENVALUES
 \section{Iterative methods to find eigenvalues}
 \subsection{Power iteration}
 Given $\lambda_1 > \lambda_2 \geq \dots \geq \lambda_n \in \lambda(A)$, the \textbf{Power iteration} is a process for finding $\lambda_1$. The basic idea is to repeatedly multiply matrix $A$ times a vector (normalizing each time) and eventually the first eigenvalue and eigenvector will emerge. This process assumes $A$ is diagonalizable, meaning it can be written of the form $A = X\Lambda X^{-1}$.
@@ -713,6 +716,28 @@ Performing the power iteration on $(A - \mu I)^{-1}$, the largest eigenvalue to 
 Since $x_i$ is also an eigenvalue of $A$, we can solve $x_i^HAx_i = \lambda_i$ for the $\lambda_i$ closest in magnitude to $\mu$.
 
 \textbf{Convergence: } $O((\abs{\frac{\lambda_i - \mu}{\lambda_j - \mu}})^k)$, where $\lambda_j$ is the next closest eigenvalue to $\mu$
+
+\subsection{Eigenvalues of similar matrices}
+\textbf{Theorem:} For $S$ any nonsingular matrix and $A = S^{-1}BS$, then i) $\lambda(A) = \lambda(B)$ and ii) $x$ eigenvector of $A$ $\Leftrightarrow S^{-1}x$ eigenvector of $B$. \textbf{Proof:}
+\begin{align*}
+    i) \; &\lambda(A) = \lambda(B):\\
+    &det(A - \lambda I) = det(S^{-1})det(A - \lambda I)det(S) = det(S^{-1}(A - \lambda I)S) = det(B - \lambda I)\\
+    ii) \;& \textrm{$x$ eigenvector of $A \Leftrightarrow S^{-1}x$ eigenvector of $B$}\\
+    &Ax = \lambda x \rightarrow S^{-1}Ax = \lambda S^{-1}x \rightarrow S^{-1}ASS^{-1}x = \lambda S^{-1}x \rightarrow B(S^{-1}x) = \lambda (S^{-1}x)
+\end{align*}
+The sections below rely on this fact that eigenvalues of similar matrices are the same.
+
+\subsection{Eigenvalues from invariant subspaces}
+\textbf{Theorem:} $X \in \mathbb{R}^{n \times m}$ is an invariant subspace of $A \in \mathbb{R}^{n \times n} \Leftrightarrow$ there is a $B \in \mathbb{R}^{n \times m}$ such that $AX = XB$. \textbf{Proof:}
+\begin{align*}
+    \Rightarrow: \;& X \textrm{ invariant} \longrightarrow Ax_i \in X \longrightarrow Ax_i = \sum_{j=1}^mx_jb_{ji} \longrightarrow AX = XB\\
+    \Leftarrow: \;& AX = XB \longrightarrow Ax_i = \sum_{j=1}^mx_jb_{ji} \longrightarrow Ax_i \in X \longrightarrow X \textrm{ invariant}
+\end{align*}
+Furthermore, when $AX = XB$, the $m$ eigenvalues of $B$ are also eigenvalues of $A$: 
+\begin{align*}
+    By = \lambda y \longrightarrow XBy = \lambda Xy \longrightarrow AXy = \lambda Xy
+\end{align*}
+We'll use this property of invariant subspaces in components of iterative methods. 
 
 \subsection{Orthogonal iteration}
 This process finds all eigenvalues and eigenvectors of $A$ in a single iterative process. We arrive at the final result with three building blocks. First, we show how we can compute each $q_i$ to capture $\lambda_i$. Next, we justify a matrix decomposition (based on Schur) that allows us to reveal $Q$. And lastly, we combine these blocks to show how this can be done at the same time for all of $A$.
@@ -800,8 +825,20 @@ So we have an algorithm for $T_k \rightarrow T_{k+1}$, this process is the \text
     2. \;&R_{k+1}U_{k+1} \longrightarrow T_{k+1}\\
     3. \;&\textrm{Repeat with } T_{k+1}
 \end{align*}
-\textbf{Proof} for why the $R_{k+1}$ is the same in both QR factorization of $A = Q_{k+1}R_{k+1}$ and $T_k = U_{k+1}R_{k+1}$
-% TODO
+\textbf{Proof by induction:} $R_{k+1}$ is the same in both QR factorization of $A = Q_{k+1}R_{k+1}$ and $T_k = U_{k+1}R_{k+1}$
+\begin{align*}
+    case \; 1:&\\
+    A &= AQ_0 = Q_1R_1, A = T_0 =U_1R_1^* \textrm{, and } T_1 = Q_k^HAQ_1\\
+    U_1R_1^* &= Q_0^TQ_1R_1 = Q_1R_1\\
+    &\Rightarrow R_1^* = R_1 \textrm{ and } U_1 = Q_0^TQ_1\\
+    case \; k:& \textrm{ Assume } R_k^* = R_k, U_k = Q_{k-1}^TQ_k \textrm{, and } T_k = Q_k^HAQ_k\\
+    case \; k+1:&\\
+    AQ_k &= Q_{k+1}R_{k+1}\\
+    T_k &=U_{k+1}R_{k+1}^* = Q_k^HAQ_k = Q_k^HQ_{k+1}R_{k+1}\\
+    &\Rightarrow R_{k+1}^* = R_{k+1} \text{ and } U_{k+1} = Q_k^HQ_{k+1}\\
+    T_{k+1} &= R_{k+1}U_{k+1} = Q_{k+1}^H(Q_{k+1}R_{k+1})U_{k+1} = Q_{k+1}^HAQ_kQ_k^HQ_{k+1}\\
+    &\Rightarrow T_{k+1} = Q_{k+1}^HAQ_{k+1}
+\end{align*}
 
 \subsection{QR iteration on upper Hessenberg}
 Each QR iteration step of a dense matrix is $O(n^3)$. If we run for $O(n)$ iterations, then this algorithm is $O(n^4)$ time complexity. To reduce flops (floating point operations) in QR iteration, we can first convert $A$ to upper Hessenberg ($H = Q^HAQ$), and proceed with QR iteration on $H$ using Givens rotations with complexity $O(n^2)$ (so overall complexity is reduced to $O(n^3)$):
@@ -838,30 +875,47 @@ Observe, this shift preserves the original QR iteration
 \end{align*}
 Also important here is that QR iteration with shift does not require that $\abs{\lambda_1} > \abs{\lambda_2} \geq \dots \geq \abs{\lambda_n}$, since we can use shift to enable convergence.
 
+
+\subsubsection{Implicit Q theorem}
+The \textbf{Implicit Q theorem:} tells us that if i) we get any upper hessneberg, $H_{k+1}$ from a transformation of $H_k \rightarrow H_{k+1}$ of the form $U^TH_kU$ ii) $We_1 = Qe_1$ for two such transformations, then the columns of $W$ and $Q$ are equal, up to a sign.
+
+\textbf{Proof:} To prove this theorem, we show for $A = QHQ^T$, $Q$ orthogonal and $H$ upper Hessenberg, that $Q$, $H$ are determined by $A$ and the 1st column of $Q$:
+\begin{align*}
+    AQ & = QH \textrm{, assume we know } q_1, \dots, q_k \textrm{ of } Q \\
+    A \begin{bmatrix} Q_k & X \end{bmatrix} &= 
+        \begin{bmatrix} Q_k & X \end{bmatrix} 
+        \begin{bmatrix} H_k & X \\ 0 & X \end{bmatrix} \textrm{, $X$ unknown and } H_k \in \mathbb{R}^{k \times k}\\
+    Aq_k &= \sum_{i=1}^kh_{i,k}q_i + k_{k+1,k}q_{k+1} \textrm{, the kth column of $AQ$, where } q_j^TAq_k = h_{j,k}\\
+    k_{k+1,k}q_{k+1} &= Aq_k - \sum_{i=1}^kh_{i,k}q_i \textrm{, the RHS of which is known}\\
+    \Rightarrow \abs{h_{k+1,k}} &= \norm{Aq_k - \sum_{i=1}^kh_{i,k}q_i}{2}\\
+    \Rightarrow q_{k+1} &= \frac{Aq_k - \sum_{i=1}^kh_{i,k}q_i}{h_{k+1,k}}
+\end{align*}
+So in conclusion, if we know the first k columns of $Q$, the subsequent column and elements of an upper Hessenberg matrix are determined up to a sign.
+
+
 \subsubsection{Fracis shift}
 The \textbf{Francis shift} is a way of selecting shifts based on the bottom-right $2\times 2$ block in a way that maintains a real-valued matrix. In effect, we double-shift using complex conjugates, $\mu, \overline{\mu}$:
 \begin{align*}
-    T - \mu I &= U_1R_1\\
-    T_1 &= R_1U_1 + \mu I\\
-    T_1 - \overline{\mu}I &= U_2R_2\\
-    T_2 &= R_2U_2 + \overline{\mu}I\\
-    T_2 &= U^H_2T_1U_2 = U^H_2U^H_1TU_1U_2 = (U_1U_2)^HT(U_1U_2)
+    H_{k-1} - \mu I &= U_kR_k\\
+    H_k &= R_kU_k + \mu I\\
+    H_k - \overline{\mu}I &= U_{k+1}R_{k+1}\\
+    H_{k+1} &= R_{k+1}U_{k+1} + \overline{\mu}I\\
+    H_{k+1} &= U^H_{k+1}H_kU_{k+1} = U^H_{k+1}U^H_kH_{k-1}U_k1U_{k+1} = (U_kU_{k+1})^HH_{k-1}(U_kU_{k+1})
 \end{align*}
-\textbf{Proof} that $(U_1U_2)$ is real
+\textbf{Proof} Consider QR factorization to show $(U_1U_2)$ is real
 \begin{align*}
-    (U_1U_2)(R_2R_1) &= U_1(T_1 - \overline{\mu}I)R_1\\
-    &= U_1(R_1U_1 + \mu I - \overline{\mu}I)R_1\\
-    &= U_1R_1(U_1R_1 + (\mu - \overline{\mu})I)\\
-    &= (T - \mu I)(T - \mu I + (\mu - \overline{\mu})I)\\
-    &= (T - \overline{\mu}I)((T - \mu I))\\
-    &= T^2 - (\mu + \overline{\mu})T + \abs{\mu}^2I \textrm{, where each component of the polynomial is} \in \mathbb{R}
+    (U_kU_{k+1})(R_{k+1}R_k) &= U_k(H_k - \overline{\mu}I)R_k\\
+    &= U_k(R_kU_k + \mu I - \overline{\mu}I)R_k\\
+    &= U_kR_k(U_kR_k + (\mu - \overline{\mu})I)\\
+    &= (H_{k-1} - \mu I)(H_{k-1} - \mu I + (\mu - \overline{\mu})I)\\
+    &= (H_{k-1} - \overline{\mu}I)(H_{k-1} - \mu I)\\
+    &= H_{k-1}^2 - (\mu + \overline{\mu})H_{k-1} + \abs{\mu}^2I \textrm{, where each component of the polynomial is} \in \mathbb{R}
 \end{align*}
-And from uniqueness of QR factorization, $(U_1U_2)$ must be real as well.
-
-With Francis shift, we 
+And from uniqueness of QR factorization, $(U_1U_2)$ must be real as well. So at any step of the Francis (double) shift we want $H_{k+1} = Q^TH_{k-1}Q$
 \begin{itemize}
-    \item Define $M = T^2 - (\mu + \overline{\mu})T + \abs{\mu}^2I$, noticing $m_1$ only has nonzero entries in the first three rows
-    \item Build $V = U_1U_2$ using bulge chasing starting with $P_1^Tm_1 = e_1$, noticing i) for $M = (U_1U_2)(R_2R_1)$ that $U_1U_2$ also has only has nonzero entries in the first three rows, ii) by implicit Q theorem $(U_1U_2)^TT(U_1U_2)$ is upper Hessenberg
+    \item Define $M = H_{k-1}^2 - (\mu + \overline{\mu})H_{k-1} + \abs{\mu}^2I$, noticing $Me_1$ only has nonzero entries in the first three rows
+    \item Want to build $V = U_1U_2$ to do shift, noticing we can get $V$ from QR factorization of $M = VR = (U_1U_2)(R_2R_1)$
+    \item Using bulge chasing starting with $P_1^TMe_1 = e_1$, noticing i) for $M = (U_1U_2)(R_2R_1)$ that $U_1U_2$ also has only has nonzero entries in the first three rows, ii) by implicit Q theorem $V^THV = (U_1U_2)^TH(U_1U_2)$ is upper Hessenberg
 \end{itemize}
 
 \subsection{QR iteration with deflation}
@@ -908,15 +962,16 @@ The process follows:
 \begin{align*}
     1. \; & \textrm{Begin with random } q_1 \in Q \textrm{, such that } \norm{q_1}{2} = 1\\ \\
     \textrm{Iterate through each of the first } & k \textrm{ columns of $Q$ with }\\
-    2. \; & Aq_j = \sum_{k = 1}^{j+1} h_{kj}q_k \textrm{, observing } q_k^TAq_j = h_{kj} \textrm{ the projection of } Aq_j \textrm{ onto } q_k\\
+    2. \; & Aq_j = \sum_{k = 1}^{j+1} h_{kj}q_k \textrm{, observing we can recover all $h_{ij}$ for $i \leq j$ since } q_i^TAq_j = h_{ij}\\
     3. \; & Aq_j = \sum_{k = 1}^{j} h_{kj}q_k + h_{j+1, j}q_{j+1}\\
     4. \; & r = Aq_j - \sum_{k = 1}^{j} h_{kj}q_k = h_{j+1, j}q_{j+1} \textrm{, where only $r$ is unknown}\\
     5. \;& \norm{q_{j+1}}{2} = 1 \Longrightarrow h_{j+1, j} = \norm{r}{2} \textrm{ and } q_{j+1} = \frac{r}{h_{j+1, j}}
 \end{align*}
-The output of this process is $k$ columns of $Q$ and the upper $k \times k$ block of upper Hessenberg matrix, $H$, which can be used in the QR iteration to reveal $k$ eigenvalues close to $\lambda(A)$.\textbf{Proof:}
+The output of this process is $k$ columns of $Q$ and the upper $k \times k$ block of upper Hessenberg matrix, $H$, which can be used in the QR iteration to reveal $k$ eigenvalues close to $\lambda(A)$. Since the first $k$ columns of $Q$ don't change depending on the number of columns of $Q$ determined, we have $Q^TAQ = H$ and $Q_k^TAQ_k = H_k$.
+\textbf{Proof:}
 \begin{align*}
     AQ &= QH \Longrightarrow AQ_k = Q_kH_k + h_{k+1,k}q_{k+1}e_k^T \textrm{, where } Q_k = Q[:, 1:k], H_k = [1:k, 1:k]\\
-    AQ_k &= Q_kX_k\Lambda_k X_k^{-1} + h_{k+1,k}q_{k+1}e_k^T, \textrm{, where } H_k = X_k\Lambda_k X_k^{-1} \textrm{ through QR iteration}\\
+    AQ_k &= Q_kX_k\Lambda_k X_k^{-1} + h_{k+1,k}q_{k+1}e_k^T \textrm{, where } H_k = X_k\Lambda_k X_k^{-1} \textrm{ through QR iteration}\\
     A(Q_kX_k) &= (Q_kX_k)\Lambda_k + h_{k+1,k}q_{k+1}x_k^T \textrm{, where } x_k^T \textrm{ is the $k^{th}$ column of } X
 \end{align*}
 And we get an equation where 
@@ -937,23 +992,32 @@ In general, Krylov spaces can be used approximate linear algebra problems of $A 
 \subsubsection{QR factorization of Krylov subspace contains $Q_k$ from Arnoldi}
 \textbf{Proof:} We show for $K_k = Q_kR_k$, that $R_k$ is upper triangular.
 \begin{align*}
-    \textrm{Want } Q^TK_k &= R_k \textrm{ upper triangular for } K_k = \begin{bmatrix}
+    \textrm{Start with } Q^TK_k &= R \textrm{ upper triangular for } K_k = \begin{bmatrix}
         \vline & \vline & & \vline \\ q_1 & Aq_1& \dots & A^kq_1 \\ \vline & \vline & & \vline \end{bmatrix}\\
         Q^Tk_j &= Q^TA^{j-1}q_1 = Q^T Q H^{j-1} Q^T q_1 \textrm{, since } A^k = Q^T H^k Q\\
         &= H^{j-1} Q^T q_1 = H^{j-1} e_1 \textrm{, since $Q$ orthogonal}\\
-        \Rightarrow r_j \in R_k &= h_1 \in H^{j-1} \textrm{, which has top $j$ rows nonzero}
+        \Rightarrow r_j \in R &= h_1 \in H^{j-1} \textrm{, which has top $j$ rows nonzero}
 \end{align*}
-The last statement can be checked by iteratively checking the first column of $H^i$. Furthermore, this result indicates that $Q_k$ forms a basis for $K(A, q_1, k)$.
+The last statement can be checked by iteratively checking the first column of $H^i$. This result indicates that $Q_kK_k$, produces an upper right triangular matrix since $Q_k$ is the first $k$ columns of $Q$. This also means $Q_k$ forms a basis for $K(A, q_1, k)$.
+
 
 \subsubsection{Arnoldi process generates a minimal polynomial}
-For vector $x \in K(A, q_1, k)$:
+\textbf{Polynomial properties}
+\begin{itemize}
+    \item If A is diagonalizable, i.e., $A = X\Lambda X^{-1}$, then polynomial $f(A) = Xf(\Lambda)X^{-1}$
+    \item \textbf{Characteristic polynomial} of A is $p_A(z) = det(zI - A) = \prod(z - \lambda_i)$ and $p_A(\lambda_i) = 0$ for $\lambda_i \in \lambda(A)$
+    \item $f(A) = 0 \Longrightarrow \lambda_i \in \lambda(A)$ are the roots of the polynomial (e.g., $p_A(A) = Xp_A(\Lambda)X_{-1} = 0$
+\end{itemize}
+Our hope with the Arnoldi process is that for $p_k(H_k) = 0$, revealed in Arnoldi, $p_k(A)$ is minimally small among degree $k-1$ polynomials. Instead of showing $\norm{p_K(A)}{2}$ is minimized (which is hard), we show $\norm{p_K(A)q_1}{2}$ is minimized.
 \begin{align*}
-    x &= Q_ky = \sum_i y_i q_i \textrm{, since $Q_k$ forms a basis of Krylov space}\\
-    &= \sum_i z_iA^{i-1}q_1 = (\sum_i z_iA^{i-1})q_1\\
-    &= p_{k-1}(A)q_1 \textrm{, a polynomial of degree $k-1$}
+    f(x) &= x^k + f_{k-1}x^{k-1} + \dots + f_0 \textrm{, for $f$ that minimizes } \norm{f(A)q_1}{2}\\
+    f(A) &= (A^k + f_{k-1}A^{k-1} + \dots + f_0)q_1 = A^kq_1 + K_kf \textrm{, where $f$ is a vector of coefficients}\\
+    &= A^kq_1 + Q_ky \textrm{, for some $y$, since $Q_k$ forms a basis for Krylov space}\\
+    \textrm{Minimal }\norm{f(A)q_1}{2} &\Longrightarrow \textrm{minimal} \norm{A^kq_1 + Q_ky}{2} \textrm{, so we need to choose $y$ to minimize polynomial}\\
+    \textrm{minimal} \norm{A^kq_1 + Q_ky}{2} & \Longrightarrow Q_k^Tf(A)q_1 = 0\\
+    Q_k^Tf(A)q_1 &= Q_k^TQf(A)Q^Tq_1 = \begin{bmatrix} I_k & 0 \end{bmatrix} f(H)e_1 = I_kf(H_k)e_1
 \end{align*}
-% TODO -- need to read the textbook
-
+This proof shows that $\norm{f(A)q_1}{2}$ is minimal $\Leftrightarrow I_kf(H_k)e_1$, the first column of $f(H_k)$ is zero. Now observe that $p_k(H_k)$ achieves this since $p_k(H_k) = 0$. Finally, assuming $K_k$ is full rank, we know $p_k$ must uniquely minimize this norm. 
 
 % LANCZOS PROCESS FOR SYMMETRIC MATRICES
 \subsection{Lanczos process}
@@ -966,10 +1030,12 @@ The \textbf{Lanczos process} is a parallel process to the Arnoldi process, but f
     \end{bmatrix}
 \end{equation*}
 The process follows
+% TODO
 \begin{align*}
     1. \;& \alpha_k = q_k^TAq_k \Longrightarrow \alpha_kq_k = Aq_k\\
     2. \;& r_k = Aq_k - \beta_{k-1}q_{k-1} - \alpha_kq_k \Longrightarrow r_k = \beta_{k-1}q_{k-1} \textrm{, $r_k$ becomes the orthogonal part of $Aq_k$}\\
-    3. \;& \beta_k \textrm{PLACEHOLDER, NEED TO REVIEW TEXTBOOK}
+    3. \;& \beta_k = \norm{r_k}{2}\\
+    4. \;& q_{k+1} = \frac{r_k}{\beta_k}
 \end{align*}
 The orthogonalization in step 2 is reduced from $O(k)$ in Arnoldi to $O(1)$ in Lanczos because of the symmetry of $A$. Professor Darve notes the "magic" in this. 
 
@@ -984,6 +1050,7 @@ The orthogonalization in step 2 is reduced from $O(k)$ in Arnoldi to $O(1)$ in L
     &\Longrightarrow \lambda_1 \in \lambda(T_k) \leq \lambda_1 - (\lambda_1-\lambda_n)(\frac{\tan(\theta)}{T_{k-1}^{Cheb}(1+2p_1)}) \textrm{, where } p_1 = \frac{\lambda_1 - \lambda_2}{\lambda_2 - \lambda_n}
 \end{align*}\
 Observe that the $RHS$ approaches $\lambda_1$ when $\lambda_1$ is well separated from the other eigenvalues. 
+
 
 
 
