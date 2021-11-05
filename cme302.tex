@@ -519,9 +519,7 @@ The Householder reflection is a QR factorization algorithm. It relies on the pri
 
 % GIVENS TRANSFORMATION
 \subsection{Givens transformation}
-The Givens transformation is a much more precise algorithm for creating an upper triangular matrix, $R$, through an orthogonal transformation, $Q^T$, of $A$, $Q^TA=R$. While the householder reflection is useful for operating on dense matrices, if we are presented with a sparse matrix, the sequential reflections of the House transformation will create more work for us.
-
-For example, consider a matrix, $A$, that has a dense upper triangular portion, and a diagonal row of nonzero entries just below the diagonal. In this case, the \textbf{Givens transformation} will allow us to zero our these limited rows with less complexity!
+While the Householder reflection is useful for operating on dense matrices, if we are presented with a sparse matrix, the sequential reflections of will transform a sparse matrix into a dense matrix and create unnecessary complexity. For example, consider upper Hessenberg matrix, $H$. the \textbf{Givens transformation} will allow us to zero our the subdiagonal with less complexity!
 
 \subsubsection{Givens transformation algorithm}
 A \textbf{Givens rotation} rotates $u = (u_1, u_2)^T$ to $\norm{u}{2}e_1$. The matrix that does this, $G^T$, is defined by
@@ -532,88 +530,77 @@ A full matrix, $P_i$, can be constructed to only contain this targeted transform
 
 % GRAM-SCHMIDT TRANSFORMATION
 \subsection{Gram-Schmidt transformation}
-The Householder and Givens transformations produce square $Q \in \mathbb{R}^{n\times n}$ matrices. However, if $A \in \mathbb{R}^{m\times n}$ is tall and thin, with $m >> n$, then we want a method to create a tall and thin $Q \in \mathbb{R}^{m\times n}$. The Gram Schmidt transformation does this.
-
-Similar to the $LU$ factorization, the \textbf{Gram-Schmidt Transformation} starts with the property that $A=QR$ can be written as a sum of the outer products of the columns of $Q$ and rows of $R$: $A = QR = q_1r_1^T + \dots q_mr_m^T$. The algorithm proceeds as follows
-
+Householder and Givens transformations produce square $Q \in \mathbb{R}^{n\times n}$ matrices. If $A \in \mathbb{R}^{m\times n}$ is tall and thin, then we may want a method to create a tall and thin $Q \in \mathbb{R}^{m\times n}$. The Gram Schmidt transformation does this.\\ \\
+Similar to the $LU$ factorization, the \textbf{Gram-Schmidt Transformation} starts with the property that $A=QR$ can be written as a sum of the outer products of the columns of $Q$ and rows of $R$: $A = QR = q_1r_1^T + \dots q_mr_m^T$:
 \begin{align*}
     r_{11} &= \norm{a_1}{2} \textrm{, since } \norm{a_1}{2} = \norm{q_1r_{11}}{2} \textrm{ and $q_i$ orthogonal}\\
     q_1 &= \frac{1}{r_{11}}a_1\textrm{, since } a_1 = q_1r_{11} \textrm{ by construction of } QR \\
     r_{1j} &= q_1^Ta_j \textrm{, (repeat for all $j$) since }\\
-    (a_j &= q_1r_{1j} + \dots + q_jr_{jj})\\
-    (q_1^Ta_j &= q_1^Tq_1r_{1j} + \dots + q_1^Tq_jr_{jj})\\
-    (q_1^Ta_j &= r_{1j}) \textrm{, since $q_i$ orthonormal}\\
-    A' &= A - q_1r_1^T\\
-    \textrm{Repeat for $A'$, the construction of }& r_{11}, q_1, r_{1j}
+    & a_j = q_1r_{1j} + \dots + q_jr_{jj}\\
+    & q_1^Ta_j = q_1^Tq_1r_{1j} + \dots + q_1^Tq_jr_{jj}\\
+    & q_1^Ta_j = r_{1j} \textrm{, since $q_i$ orthonormal}\\
+    A' &= A - q_1r_1^T
+\end{align*}
+Repeat for $A'$, the construction of $r_{kk}, q_k, r_{kj}$
+\begin{align*}
+    a_k &= \sum_{i=1}^kr_{ik}q_i = r_{kk}q_k + \sum_{i=1}^{k-1}r_{ik}q_i\\
+    1. \; &r_{ik} = q_i^Ta_k \textrm{ for each $r_{ik}, i < k$, since $Q$ orthonormal and $q_{k-1}$ known}\\
+    2. \; &z = r_{kk}q_k = q_k - \sum_{i=1}^{k-1}r_{ik}q_i\\
+    3. \; & r_{kk} = \norm{z}{2}, \; q_k = \frac{z}{r_{kk}}
 \end{align*}
 
 
 % LEAST SQUARES
 \subsection{QR factorization to solve least-squares problems}
-When $A$ is really tall and thin, it is very unlikely that we get a solution to $Ax = b$. Instead, we choose to solve the least-squares problem, where we seek to find $argmin_x\norm{Ax - b}{2}$. 
+When $A$ is tall and thin, it is unlikely that we get a solution to $Ax = b$. Instead, we choose to solve the least-squares problem, $argmin_x\norm{Ax - b}{2}$. 
 
 % NORMAL EQUATIONS
 \subsubsection{Method of normal equations}
-Assuming $A$ full rank. Geometrically, the point, $x$ which solves $argmin_x\norm{Ax - b}{2}$ is one where $b-Ax$ is orthogonal to the range of $A$. To solve for this, $x$:
-
+Assuming $A$ full rank. Geometrically, the point, $x$ which solves $argmin_x\norm{Ax - b}{2}$ is one where $b-Ax$ is orthogonal to the range of $A$. To solve for this:
 \begin{align*}
-    \textrm{Want: } (b-Ax) &\perp \{z \vert z = Ay\}\\
-    (b-Ax) &\perp range(A)\\
-    (b-Ax) &\perp a_i, \forall i \in A\\
-    a_1^T(b-Ax) &= 0, \forall i \in A\\
-    A^T(b-Ax) &= 0\\
-    x &= (A^TA)^{-1}A^Tb
+    \textrm{Want: } (b-Ax) &\perp \{z \vert z = Ay\} \longleftrightarrow (b-Ax) \perp range(A) \longleftrightarrow (b-Ax) \perp a_i, \forall i \in A\\
+    a_1^T(b-Ax) &= 0, \forall i \in A \longleftrightarrow A^T(b-Ax) = 0 \longleftrightarrow x = (A^TA)^{-1}A^Tb
 \end{align*}
-We can use Cholesky method for fast and accurate solve of this method since $A^TA$ is SPD. This method can run into issues when A is poorly conditioned. Notice, condition number of $A^TA, \kappa(A^TA) = \kappa(A)^2$, so if A is poorly conditioned, this method can get inaccurate. 
+We can use Cholesky fast/accurate solve since $A^TA$ is SPD. Notice, condition number of $A^TA, \kappa(A^TA) = \kappa(A)^2$, so if A is poorly conditioned, this method can get inaccurate. 
 
 % QR METHOD FOR LEAST SQUARES
 \subsubsection{QR method for least squares}
 Assuming $A$ full rank. The QR method for least squares attempts to address the issue of poor conditioning and may also lead to faster computation. We construct the QR method for least squares with one of the normal equation equalities:
 
 \begin{align*}
-    A^T(Ax-b) &= 0\\
-    R^TQ^T(Ax-b) &= 0\\
+    A^T(Ax-b) &= 0 \longleftrightarrow R^TQ^T(Ax-b) = 0\\
     Q^T(Ax-b) &= 0 \textrm{, since we assume $A, R$ full rank (multiply both sides by $R^{-T}$})\\
-    Q^TQRx-Q^Tb &= 0 \\
-    Rx &= Q^Tb \\
-    x &= R^{-1}Q^Tb
+    Q^TQRx-Q^Tb &= 0 \longleftrightarrow Rx = Q^Tb \longleftrightarrow x = R^{-1}Q^Tb
 \end{align*}
 
 % SVD FOR RANK-DEFICIENT A
 \subsubsection{SVD for rank-deficient A}
-It may be that A is not full rank. When this is the case, we can get infinite solutions (a line of points that satisfy $argmin_x\norm{Ax - b}{2}$). To choose $x$, we add the additional criteria $\min_x \norm{x}{2}$ to our original objective function of $argmin_x\norm{Ax - b}{2}$.\\
-
-We can use the "thin" version of the Singular Value Decomposition to solve this! By thin we mean, for $A \in \mathbb{R}^{m \times n}$ with rank, $r$, construct $U \in \mathbb{R}^{m \times r}, \; \Sigma \in \mathbb{R}^{r \times r}$(, notice this $\Sigma$ has an inverse), $V^T \in \mathbb{R}^{r \times n}$. And calculate $x$ as
-
+When $A$ not full rank, we can get infinite solutions (a line of points that satisfy $argmin_x\norm{Ax - b}{2}$). To choose $x$, we add constraint $\min_x \norm{x}{2}$ to our original objective function, $argmin_x\norm{Ax - b}{2}$.\\ \\
+We can use the "thin" version of the Singular Value Decomposition to solve this, with $A \in \mathbb{R}^{m \times n}, \; rank(A) = r$, construct $U \in \mathbb{R}^{m \times r}, \; \Sigma \in \mathbb{R}^{r \times r}$(, notice this $\Sigma$ has an inverse), $V^T \in \mathbb{R}^{r \times n}$. And calculate $x$ as
 \begin{align*}
-    (Ax-b) &\perp range(A)\\
-    (Ax-b) &\perp range(U) \textrm{, since $R(A) = R(U)$ for $A=U\Sigma V^T$}\\
-    U^T(Ax-b) &= 0\\
-    U^T(U\Sigma V^Tx - b) &= 0\\
-    \Sigma V^Tx &= U^Tb\\ 
+    (Ax-b) &\perp range(A) \longleftrightarrow (Ax-b) \perp range(U) \textrm{, since $R(A) = R(U)$ for $A=U\Sigma V^T$}\\
+    U^T(Ax-b) &= 0 \longleftrightarrow U^T(U\Sigma V^Tx - b) = 0 \longleftrightarrow \Sigma V^Tx = U^Tb\\ 
     x &= V\Sigma^{-1}U^Tb \textrm{ (the "thin" SVD here provides a nonsingular $\Sigma\in \mathbb{R}^{r \times r}$, so we can take the inverse}
 \end{align*}
-Observe $\min_x \norm{x}{2}$ the $x \perp N(A)$, the shortest vector between $N(A)$ and the vector/plane of solutions to $argmin_x\norm{Ax - b}{2}$. This value it turns out must be in $R(V)$ since $R(V) = N(A)^\perp$
+Observe for $\min_x \norm{x}{2}$ that the $x \perp N(A)$ is the shortest vector between $N(A)$ and the vector/plane of solutions to $argmin_x\norm{Ax - b}{2}$. This value must be in $R(V)$ since $R(V) = N(A)^\perp$
 
 
 % ITERATIVE METHODS FOR EIGENVALUES
 \section{Iterative methods to find eigenvalues}
 \subsection{Power iteration}
 Given $\lambda_1 > \lambda_2 \geq \dots \geq \lambda_n \in \lambda(A)$, the \textbf{Power iteration} is a process for finding $\lambda_1$. The basic idea is to repeatedly multiply matrix $A$ times a vector (normalizing each time) and eventually the first eigenvalue and eigenvector will emerge. This process assumes $A$ is diagonalizable, meaning it can be written of the form $A = X\Lambda X^{-1}$. Reminder: for $A$ diagonalizable $\Longrightarrow A^k = X \Lambda^k X^{-1}$
-
 \begin{align*}
     A^k &= \sum_{i = 1}^n \lambda_i^k x_i y_i^T \textrm{ where $Y = X^{-1}$}\\
     A^k &\approx \lambda_1^kx_1y_1^T \textrm{ since } \lambda_1 > \lambda_2\\
-    A^kq &\approx \lambda_1^kx_1y_1^Tq = \lambda_1^k(y_1^Tq)x_1 \textrm{, since $y_1^Tq$ is a scalar. Observe } A^kq \sim \parallel x_1
+    A^kq &\approx \lambda_1^kx_1y_1^Tq = \lambda_1^k(y_1^Tq)x_1 \textrm{, since $y_1^Tq$ is a scalar. Observe } A^kq \parallel x_1
 \end{align*}
 This theory is implemented in practice with the following formula
-
 \begin{align*}
     1. \;& q_0 \textrm{, vector chosen at random}\\
-    2. \;& z_k = Aq_k = A^kq_0 \textrm{, evaluating for convergence if } z_k \sim \parallel q_k \rightarrow z_k^Tx_k = \sqrt{\norm{z}{2}\norm{x}{2}}\\
+    2. \;& z_k = Aq_k = A^kq_0 \textrm{, evaluating for convergence if } z_k \parallel q_k \rightarrow z_k^Tx_k = \norm{z}{2}\norm{x}{2}\\
     3. \;& q_{k+1} = \frac{z_k}{\norm{z_k}{2}} = \frac{A^kq_0}{\norm{A^kq_0}{2}} \approx (\frac{\lambda_2}{\abs{\lambda_1}})^kx_1
 \end{align*}
-Since $A^{k}q_0 = Aq_{k} \approx \lambda_1 x_1$, where $\norm{x_1}{2} = 1 \; (WLOG)$ and $q_k \sim \parallel x_1$, we can solve for $\lambda$:
+Since $A^{k}q_0 = Aq_{k} \approx \lambda_1 x_1$, where $\norm{x_1}{2} = 1 \; (WLOG)$ and $q_k \parallel x_1$, we can solve for $\lambda$:
 
 \begin{align*}
     Aq_k \approx \lambda_1 x_1 &\Longrightarrow Ax_1 \approx \lambda_1x_1 \Rightarrow x_1^HAx_1 \approx \lambda_1\\
@@ -626,34 +613,25 @@ Since $A^{k}q_0 = Aq_{k} \approx \lambda_1 x_1$, where $\norm{x_1}{2} = 1 \; (WL
 
 
 \subsection{Inverse iteration}
-This process finds the eigenvector (and corresponding eigenvalue) of $A$ that is closest to the value $\mu$. The basic idea is to multiply matrix $(A - \mu I)^{-1}$ iteratively by a random vector, $z$, normalizing each time. Eventually, you will get the eigenvector for the eigenvalue closest to $\mu$. \\
-
-\noindent Observe $(A - \mu I)^{-1}$ has the same eigenvectors of $A$:
-
+This process finds the eigenvector (and corresponding eigenvalue) of $A$ that is closest to the value $\mu$. The basic idea is to multiply matrix $(A - \mu I)^{-1}$ iteratively by a random vector, $z$, normalizing each time. Eventually, you will get the eigenvector for the eigenvalue closest to $\mu$. \\ \\ 
+Observe $(A - \mu I)^{-1}$ has the same eigenvectors of $A$:
 \begin{align*}
-    (A - \mu I)^{-1}x &= \lambda x\\
-    x &= (A - \mu I)x = \lambda Ax - \lambda \mu x\\
-    \lambda Ax &= x + \lambda \mu x\\
-    Ax &= \frac{(1 + \lambda \mu)}{\lambda}x
+    (A - \mu I)^{-1}x &= \lambda x \longleftrightarrow x = (A - \mu I)x = \lambda Ax - \lambda \mu x \longleftrightarrow \lambda Ax = x + \lambda \mu x \longleftrightarrow Ax = \frac{(1 + \lambda \mu)}{\lambda}x
 \end{align*}
 Performing the power iteration on $(A - \mu I)^{-1}$, the largest eigenvalue to emerge will be of the form $\frac{1}{\lambda_i - \mu}$, and we get
 \begin{align*}
     (A - \mu I)^{-1k}q_0 &= (A - \mu I)^{-1}q_{k} \approx \lambda_i x_i \textrm{, where } \norm{x_i}{2} = 1 \; (WLOG) \textrm{ and } q_k \parallel x_i
 \end{align*}
-Since $x_i$ is also an eigenvalue of $A$, we can solve $x_i^HAx_i = \lambda_i$ for the $\lambda_i$ closest in magnitude to $\mu$. \\
-
-\noindent \textbf{Convergence: } $O((\abs{\frac{\lambda_i - \mu}{\lambda_j - \mu}})^k)$, where $\lambda_j$ is the next closest eigenvalue to $\mu$
+Since $x_i$ is also an eigenvalue of $A$, we can solve $x_i^HAx_i = \lambda_i$ for the $\lambda_i$ closest in magnitude to $\mu$. \textbf{Convergence: } $O(\abs{\frac{\lambda_i - \mu}{\lambda_j - \mu}})^k)$, where $\lambda_j$ is the next closest eigenvalue to $\mu$
 
 \subsection{Eigenvalues of similar matrices}
-\textbf{Theorem:} For $S$ any nonsingular matrix and $A = S^{-1}BS$, then i) $\lambda(A) = \lambda(B)$ and ii) $x$ eigenvector of $A$ $\Leftrightarrow S^{-1}x$ eigenvector of $B$. \textbf{Proof:}
-
+\textbf{Theorem:} For $S$ nonsingular and $A = S^{-1}BS$, then i) $\lambda(A) = \lambda(B)$ and ii) $x$ eigenvector of $A$ $\Leftrightarrow S^{-1}x$ eigenvector of $B$.
 \begin{align*}
     i) \; &\lambda(A) = \lambda(B):\\
     &det(A - \lambda I) = det(S^{-1})det(A - \lambda I)det(S) = det(S^{-1}(A - \lambda I)S) = det(B - \lambda I)\\
     ii) \;& \textrm{$x$ eigenvector of $A \Leftrightarrow S^{-1}x$ eigenvector of $B$}\\
     &Ax = \lambda x \rightarrow S^{-1}Ax = \lambda S^{-1}x \rightarrow S^{-1}ASS^{-1}x = \lambda S^{-1}x \rightarrow B(S^{-1}x) = \lambda (S^{-1}x)
 \end{align*}
-The sections below rely on this fact that eigenvalues of similar matrices are the same.
 
 \subsection{Eigenvalues from invariant subspaces}
 \textbf{Theorem:} $X \in \mathbb{R}^{n \times m}$ is an invariant subspace of $A \in \mathbb{R}^{n \times n} \Leftrightarrow$ there is a $B \in \mathbb{R}^{n \times m}$ such that $AX = XB$. \textbf{Proof:}
@@ -662,17 +640,11 @@ The sections below rely on this fact that eigenvalues of similar matrices are th
     \Rightarrow: \;& X \textrm{ invariant} \longrightarrow Ax_i \in X \longrightarrow Ax_i = \sum_{j=1}^mx_jb_{ji} \longrightarrow AX = XB\\
     \Leftarrow: \;& AX = XB \longrightarrow Ax_i = \sum_{j=1}^mx_jb_{ji} \longrightarrow Ax_i \in X \longrightarrow X \textrm{ invariant}
 \end{align*}
-Furthermore, when $AX = XB$, the $m$ eigenvalues of $B$ are also eigenvalues of $A$: 
-\begin{align*}
-    By = \lambda y \longrightarrow XBy = \lambda Xy \longrightarrow AXy = \lambda Xy
-\end{align*}
-We'll use this property of invariant subspaces in components of iterative methods. 
+Furthermore, when $AX = XB$, the $m$ eigenvalues of $B$ are also eigenvalues of $A$: $By = \lambda y \longrightarrow XBy = \lambda Xy \longrightarrow AXy = \lambda Xy$
 
 \subsection{Orthogonal iteration}
-This process finds $r$ eigenvalues and eigenvectors of $A$ in a single iterative process. We arrive at the final result with three building blocks. First, we show how we can compute each $q_i$ to capture $\lambda_i$. Next, we justify a matrix decomposition (based on Schur) that allows us to reveal $Q$. And lastly, we combine these blocks to show how this can be done at the same time for all $r$ eigenvalues of $A$.
-
-First, consider how orthogonal columns could reveal subsequent eigenvalues. Assume we have used the power iteration to compute $q_1$. To get $q_2$
-
+This process finds $r$ eigenvalues and eigenvectors of $A$ in a single iterative process.\\ \\
+First, consider how to construct orthogonal columns to reveal subsequent eigenvalues. Assume we use power iteration to compute $q_1$. To get $q_2$:
 \begin{align*}
     A^k &= \lambda_1x_1y_1^T + \lambda_2x_2y_2^T + \dots\\
     PA^k &= \lambda_1Px_1y_1^T + \lambda_2Px_2y_2^T + \dots \textrm{, where } P = I - x_1x_1^T\\
@@ -680,39 +652,35 @@ First, consider how orthogonal columns could reveal subsequent eigenvalues. Assu
     PA &\textrm{ can now be used to apply the power iteration to to reveal $\lambda_2$ and } (I - x_1^Tx_1)x_2
 \end{align*}
 The general process is:
-
 \begin{itemize}
     \item Start with $\lambda_1, q_1$ from power iteration
     \item Build $P_2$, orthogonal projector onto $\{q_1\}^\perp$, use power iteration to reveal ($\lambda_2, q_2$)
     \item Build $P_r$, orthogonal projector onto  $\{q_1, \dots, q_{r-1}\}^\perp$, use power iteration to reveal ($\lambda_r, q_r$)
 \end{itemize}
-Now, consider the QR decomposition of $X$, observing that the last line is the Schur Decomposition:
+Now consider the QR decomposition of $X$, observing its connection to the Schur Decomposition:
 \begin{align*}
     A &= X\Lambda X^{-1} = QR \Lambda R^{-1} Q^H = QTQ^H \textrm{, where upper triangular } T = R\Lambda R^{-1}
 \end{align*}
 \begin{itemize}
     \item The eigenvalues of $A$ are on the diagonal of $T$
-    \item By construction, each column of $Q$ is projecting the corresponding column of $X$ onto a vector orthogonal the preceding ones
+    \item By construction, each column of $Q$ is projecting the corresponding column of $X$ onto a vector orthogonal to the preceding ones
     \item The span of the columns of $Q, span\{q_1, \dots, q_n\}$ will be equal to the span of the columns of $X, span\{x_1, \dots, x_n\}$.
 \end{itemize}
 The process for the \textbf{orthogonal iteration} is:
-
 \begin{align*}
     1. \;& AQ_k \rightarrow Z \textrm{, where $k$ is the iteration and } Q_0 = I\\
     2. \;& Z \rightarrow Q_{k+1}R_{k+1} \textrm{, the QR factorization of $Z$}\\
     3. \;& \textrm{Repeat } AQ_{k+1} \rightarrow Z \textrm{ and eventually } Q_k \rightarrow Q
 \end{align*}
-Note in each iteration we are calculating $Q_{k+1}^HAQ_k = R_{k+1}$ (This $R_{k}$ is commonly referred to as $T_k$) 
+Note in each iteration we are calculating $Q_{k+1}^HAQ_k = R_{k+1}$
 
 \subsubsection{Reveal eigenvectors of $A$ from $T$}
 Motivation: $A = X\Lambda X^{-1}$ can be hard to calculate.
-
 \begin{align*}
     A &= X\Lambda X^{-1} = QR \Lambda R^{-1}Q^H = QTQ^H \textrm{, where } T = R\Lambda R^{-1}\\
     A &= QY\Lambda Y^{-1}Q^H \textrm{, where $T = Y \Lambda Y^{-1}$ is easier to compute}
 \end{align*}
 Focusing on $T = Y \Lambda Y^{-1}$, choose some $\lambda_i$ (we could get from power or QR iteration). 
-
 \begin{align*}
     Tx &= \lambda_i x\\
     (T - \lambda_i I)x &= 0\\
