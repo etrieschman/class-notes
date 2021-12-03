@@ -684,6 +684,22 @@ The \textbf{information} that data, $X$, contains about parameter, $\theta$ is d
     &Var(T(X)) \geq \frac{g'(\theta)^2}{I(\theta)}
 \end{align*}
 \subsubsection{The "Big" theorem: Asymptotic distribution using Fischer Information}
+Under regularity assumptions, the maximum likelihood estimator (or any other reasonable estimator), $\hat{\theta}$ of $\theta$ satisfies
+\begin{equation*}
+    \sqrt{n}(\hat{\theta} - \theta) \overset{d}{\longrightarrow} N\left(0, \frac{1}{I(\theta)}\right)
+\end{equation*}
+\textbf{Sketch of proof:}
+\begin{align*}
+    L(\theta) &= \prod_{i=1}^nf(X_i, \theta)\\
+    l(\theta) &= log(L(\theta)) = \sum_{i=1}^nlog(f(X_i, \theta))\\
+    \textrm{MLE solves } l'(\hat{\theta}) = &0 \textrm{, with } l'(\theta) \approx \; l'(\theta_0) + (\hat{\theta} - \theta_0)l''(\theta_0)\\
+    &\textrm{(full proof requires showing the error in this approx. is small)}\\
+    &0 = l'(\theta_0) + (\hat{\theta} - \theta_0)l''(\theta_0) \Longrightarrow \hat{\theta} - \theta_0 = \frac{l'(\theta_0)}{l''(\theta_0)}\\
+    &\Longrightarrow \sqrt{n}(\hat{\theta} - \theta_0) = \sqrt{n}\frac{l'(\theta_0)}{l''(\theta_0)} = \frac{l'(\theta_0)}{\sqrt{n}} \div \frac{l''(\theta_0)}{n}\\
+    & \frac{l''(\theta_0)}{n} = \frac{\sum \frac{d^2}{d\theta^2}log(f(X, \theta))}{n} \overset{p}{\longrightarrow}  - E_\theta \left [\frac{d^2}{d\theta^2}log(f(X, \theta)) \right ] = I(\theta)\\
+    & \frac{l'(\theta_0)}{\sqrt{n}} = \frac{\sum \frac{d}{d\theta}log(f(X, \theta))}{\sqrt{n}} \overset{d}{\longrightarrow} N(0, I(\theta))\\
+    & \frac{l'(\theta_0)}{\sqrt{n}} \div \frac{l''(\theta_0)}{n} \overset{d}{\longrightarrow} N\left(0, \frac{I(\theta)}{I(\theta)^2}\right) = N\left(0, \frac{1}{I(\theta)}\right) \textrm{, by Slutsky's theorem}
+\end{align*}
 
 
 \subsection{Bayes estimator}
