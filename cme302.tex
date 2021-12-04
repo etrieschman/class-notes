@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{mathtools,amssymb}
 \usepackage{lipsum}
+\usepackage{hyperref}
 \usepackage{layout}
 \usepackage{geometry}
 \newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
@@ -22,6 +23,14 @@
  bottom=\userMarginInMm mm,
  footskip=5mm}
 
+ \hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdfpagemode=FullScreen,
+    }
+
 
 %HEADERS
 % https://web.mit.edu/texsrc/source/latex/layouts/layman.pdf
@@ -33,6 +42,7 @@
 
 \begin{document}
 \maketitle
+\tableofcontents
 
 \section{Linear algebra review}
 
@@ -910,5 +920,245 @@ The orthogonalization in step 2 is reduced from $O(k)$ in Arnoldi to $O(1)$ in L
     &\Longrightarrow \lambda_1 \in \lambda(T_k) \leq \lambda_1 - (\lambda_1-\lambda_n)(\frac{\tan(\theta)}{T_{k-1}^{Cheb}(1+2p_1)}) \textrm{, where } p_1 = \frac{\lambda_1 - \lambda_2}{\lambda_2 - \lambda_n}
 \end{align*}\
 Observe that the $RHS$ approaches $\lambda_1$ when $\lambda_1$ is well separated from the other eigenvalues. 
+
+\section{Iterative splitting methods for solving linear systems}
+Use iterative methods to solve linear systems when i) $A$ large and direct methods are computationally expensive, or ii) $A$ is sparse and $Ax$ easily computed. Ideally these methods can reduce cost below $O(n^3)$\\
+\textbf{General idea:}
+\begin{align*}
+    &\textrm{For } A = M - N \textrm{, where } M \textrm{ nonsingular: } Ax = b \Longleftrightarrow Mx - Nx = b \Longleftrightarrow x = M^{-1}Nx + M^{-1}b\\
+    &\textrm{And $x$ becomes a fixed point of } f(x) = M^{-1}Nx + M^{-1}b\\
+\end{align*}
+Fixed points can be identified by iteratively computing $f(x), f(f(x)), \dots$ on starting input, $x$.\\\\
+\textbf{Convergence} depends on $M^{-1}N$: Define the error at step $k+1$ as $e_{k+1} = x_{k+1} - x$, then
+\begin{align*}
+    e_{k+1} &= x_{k+1} - x = M^{-1}Nx_{k} + M^{-1}b - M^{-1}Nx - M^{-1}b\\
+    &= M^{-1}Nx_{k} - M^{-1}Nx = M^{-1}N(x_{k} - x) = M^{-1}Ne_k\\
+    e_{k+1} &= (M^{-1}N)^ke_0
+\end{align*}
+And convergence only occurs when the spectral radius of $M^{-1}N$, $\rho(M^{-1}N)<1$. Where $\rho(A) = \max_{\lambda_i \in \lambda(A)} \abs{\lambda_i}$\\
+\textbf{Proof:}
+\begin{align*}
+    \textrm{Let } Gv&=\lambda v \textrm{, where } G = M^{-1}N \textrm{ and pick } x_0 = x + v \textrm{ as a first guess solve}\\
+    \textrm{Then } e_k &= G^ke_0 = G^k(x_0 - x) = G^kv = \lambda^kv\\
+\end{align*}
+And $e_k \rightarrow 0$ if $\abs{\lambda} < 1$.\\\\
+The following sections review how to pick $M$ and $N$
+
+\subsection{Jacobi}
+\textbf{Definition: }Let $A = D - L - U$, and choose $M = D$ and $N = L+U$. Then we have $Dx_{k+1} = (L+U)x_k + b$\\
+\textbf{Convergence: }Converges for any $x_0$ when $A$ is strictly diagonally dominant: $\abs{a_ii} > \sum_{j\neq i} \abs{a_ij}$\\
+\textbf{Proof: }
+\begin{align*}
+    g_{ii} = 0 \textrm{ for } G = M^{-1}N &\Longrightarrow \lambda \in D_i = \{ z \mid \abs{z} \leq \sum_{i\neq j}\abs{g_{ij}}\} \textrm{, by Gershgorin Disc Theorem}\\
+    \textrm{Suffice to show } \sum_{i\neq j}\abs{g_{ij}} < 1: \; \;& \sum_{i\neq j}\abs{g_{ij}} < 1 \Longrightarrow \sum_{i\neq j} \frac{\abs{a_{ij}}}{\abs{a_{ii}}} <1 \Longrightarrow \sum_{i\neq j}\abs{a_{ij}} < \abs{a_{ii}}\\
+    &\Longrightarrow \textrm{$A$ is strictly diagonoally dominant}
+\end{align*}
+
+\subsection{Gauss-Seidel}
+\textbf{Definition: } Let $A = D - L - U$, and choose $M = D - L$ and $N = U$. Then we have $(D - L)x_{k+1} = Ux_k + b$\\
+\textbf{Householder-John Theorem: } if $A, B \in \mathbb{R}^{m \times n}$ and $A$ and $[A - B - B^T]$ are SPD, then $\rho(H) < 1$ where $H = (A - B)^{-1}B$\\
+\textbf{Proof:}
+\begin{align*}
+    Hx = \lambda x &\Longrightarrow (A - B)^{-1}Bx = \lambda x \Longrightarrow Bx = \lambda (A - B)x \Longrightarrow Bx = \frac{\lambda}{1 + \lambda}Ax\\
+    x^HBx &= \frac{\lambda}{1 + \lambda}x^HAx \Longrightarrow x^HB^Tx = \frac{\tilde{\lambda}}{1 + \tilde{\lambda}}x^HA^Tx \textrm{, by taking the complex conjugate of both sides}\\
+    0 &< x^HAx - x^HBx - x^HB^Tx = \frac{1 - \abs{\lambda}^2}{\abs{1 + \lambda}^2}x^HAx \textrm{, since $A-B-B^T$ SPD}\\
+    0 &< x^HAx \Longrightarrow \abs{\lambda}<1 \textrm{, since $A$ SPD}
+\end{align*}
+\textbf{Convergence: } If $A$ SPD, then Gauss-Seidel converges for any $x_0$\\
+\textbf{Proof:}
+Choose $A$ SPD with $A = D - L - U$ and $B = -U = -L^T$
+\begin{align*}
+    A - B - B^T &= (D - L - U) - (-U) - (-L) = D \textrm{, observe $D$ SPD}\\
+    H &= [(D - L - U) - (-U)]^{-1}(-U) = -(D - L)^{-1}U = -G \textrm{, so } \rho(B) = \rho(-G) = \rho(H) < 1
+\end{align*}
+
+
+\subsection{Successive Over-Relaxation (SOR)}
+\textbf{Definition:} Using the Gauss-Seidel method, we attempt to increase acceleration using $0<\omega<2$. The  iterative method is $x_{k+1} = x_k + \omega\left[D^{-1}(b + Lx_{k+1} + Ux_k) - x_k\right]$
+\begin{align*}
+    \textrm{In Gauss-Seidel: }& (D - L)x_{k+1} = b + Ux_k \Longrightarrow x_{k+1} = x_k + D^{-1}(b + Lx_{k+1} + Ux_k) - x_k\\
+    & x_{k+1} = x_k + \Delta x_{k+1} \textrm{, where } \Delta x_{k+1} = D^{-1}(b + Lx_{k+1} + Ux_k) - x_k\\
+    \textrm{In SOC: }& x_{k+1} = x_k + \omega\Delta x_{k+1} = x_k + \omega(D^{-1}(b + Lx_{k+1} + Ux_k) - x_k)
+\end{align*}
+SOR is itself a splitting method with $A = D - L - U$,  $M = \frac{1}{\omega}D - L$ and $N = (\frac{1}{\omega} - 1)D + U$\\
+\textbf{Convergence:} If $A$ SPD, then SOR converges for any $\omega \in (0, 2)$\\
+\textbf{Proof:}
+In the Householder-John Theroem, choose $A_{HJ} = \omega A$ and $B_{HJ} = (\omega - 1)D - \omega U$
+\begin{align*}
+    A \textrm{ SPD and } A_{HJ} - B_{HJ} - B_{HJ}^T = (2-\omega)D \textrm{ SPD if } 0 < \omega < 2\\
+    \textrm{Then }(A_{HJ} - B_{HJ})^{-1}B_{HJ} = (D -\omega L)^{-1}((\omega - 1)D - \omega U) = G_{SOR}\\
+    \textrm{Then } \rho(G_{SOR}) = \rho((A_{HJ} - B_{HJ})^{-1}B_{HJ}) = \rho(H)<1
+\end{align*}
+Also, for $\omega \notin (0, 2)$ there exists $x_0$ s.t. SOR will not converge\\
+\textbf{Proof:}
+\begin{align*}
+    det(G) &= det(M^{-1}N) = \frac{det((1-\omega)D + \omega U)}{det(D - \omega L)} = \frac{\prod_i(1-\omega)d_{ii}}{\prod_i d_{ii}} = (1-\omega)^n \textrm{, since $L, U$ triangular with 0 on diagonal}\\
+    det(G) &= \prod_{\lambda_i \in \lambda(G)}\lambda_i = (1-\omega)^n \Longrightarrow \abs{\lambda_{max}(G)}\geq \abs{1 - \omega} \Longrightarrow \textrm{Convergence only when } \abs{1 - \omega} < 1
+\end{align*}
+
+\subsection{Chebyshev Semi-iterative Method}
+The most efficient splitting method, but requires us knowing the interval containing $\lambda(A)$. It also uses knob, $\omega$, but we can choose to update this at each step\\
+\textbf{Definition: }With $A = M - N$, $G = M^{-1}N$, and $\omega_k \in \mathbb{R}$, the iterative method is
+\begin{align*}
+    x_{k+1} &= x_k + \omega_k((M^{-1}b + Gx_k) - x_k) = x_k + \omega_kM^{-1}(b - Ax_k)\\
+    \textrm{With } e_k &= (I - \omega_{k-1}M^{-1}A)e_{k-1} = \left(\prod_{i=0}^{k-1}(I - \omega_{i}M^{-1}A)\right)e_0
+\end{align*}
+We can minimize error $e_k$ with $\norm{q_k(M^{-1}A)e_0}{2}$, where $q_k(x) = (1 - \omega_{k-1}x)\dots(1 - \omega_0x)$. 
+\begin{align*}
+    \norm{e_0}{2} =& \norm{q_k(M^{-1}A)e_0}{2} \leq \max_\lambda q_k(\lambda)\norm{e_0}{2}\\
+    &\textrm{Recalling } q_k(M^{-1}A) = Xq_k(\Lambda)X^{-1} \textrm{ for } M^{-1}A = X\Lambda X^{-1} \textrm{ with each diagonal element in } q_k(\Lambda) = q_k(\lambda_i)\\
+    \norm{e_k}{2} \leq& \max_\lambda q_k(\lambda)\norm{e_0}{2} \leq \frac{\norm{e_0}{2}}{T_k\left(\frac{\beta + \alpha}{\beta - \alpha}\right)} \textrm{, where } \abs{q_k(x)} \leq \frac{1}{T_k\left(\frac{\beta + \alpha}{\beta - \alpha}\right)}
+\end{align*}
+
+\section{Iterative Krylov methods for solving linear systems}
+Motivation: We can look for solutions to $Ax=b$ in the increasing dimensions of the Krylov subspace.\\
+At a given step in splitting methods we have
+\begin{equation*}
+    x_k = b + (I - A)x_{k-1} = x_{k-1} + b - Ax_{k-1} \textrm{, for } M = I
+\end{equation*}
+Unrolling the iterations, we see $x_k$ is a linear combination of $\{b, Ab, \dots, A^{k-1}b\}$, a Krylov Subspace of $A$. We can write 
+\begin{itemize}
+    \item $x_k = Q_ky$ for $Q_k$ the orthonormal basis of $\mathcal{K}_k(A, b, k)$
+    \item $r_k = b - Ax_k = b - AQ_ky$
+    \item Minimizing $r_k \Longleftrightarrow r_k \perp \mathcal{K}(A, b, k)$. 
+\end{itemize}
+
+
+\subsection{Conjugate Gradient}
+Krylov method for SPD matrices. Error, $x - Q_ky$ minimized in $A$ norm. Residual, $r_k$, minimized in $A^{-1}$ norm. O(n) per iteration.
+
+\subsubsection{Naive approach to CG}
+\begin{align*}
+    \textrm{Minimize } \norm{r_k}{{A^{-1}}}^2 = (b - AQ_ky)^TA^{-1}(b - AQ_ky) = b^Tx - 2y^TQ_k^Tb + y^TQ_k^TAQ_ky\\
+    \frac{d}{dy}\left(b^Tx - 2y^TQ_k^Tb + y^TQ_k^TAQ_ky\right) = 0 \Longrightarrow Q^T_kAQ_ky = Q^T_kb \textrm{, minimizes y}
+\end{align*}
+And the iterative process becomes
+\begin{itemize}
+    \item Construct $Q_k$ from Lanczos process (O(n))
+    \item Compute $y$ from $Q^T_kAQ_ky = Q^T_kb = \norm{b}{2}e_1$ (O(k), since $H_k$ assembled in Lanczos)
+    \item Compute $x_k = Q_ky$ (O(kn), the expensive step we'll try to simplify)
+\end{itemize}
+
+\subsubsection{Efficient approach to CG}
+\textbf{Search directions:} We increase efficiency by working with search directions, $\Delta x_k = x_{k+1} - x_k$, instead of $x_{k+1}$ directly\\
+Search directions, $\Delta x_k, \Delta x_l$ are $A$-conjugate: $(\Delta x_k)^TA\Delta x_l = 0$ for $k \neq l$\\
+\textbf{Proof:}
+\begin{align*}
+    r_k - r_{k+1} = (b - Ax_k) - (b - Ax_{k+1}) = Ax_{k+1} - Ax_k &= A \Delta x_k \\
+    \textrm{Since } r_k, r_{k+1} \perp Q_k &\Longrightarrow A \Delta x_k \perp Q_k\\
+    \Delta x_l = x_{l+1} - x_l \in \mathcal{K}_{l+1} \textrm{ and } \Delta x_k = x_{k+1} - x_k \in \mathcal{K}_{k+1} &\Longrightarrow \textrm{For } l < k, A\Delta x_k\perp \Delta x_l \Rightarrow \Delta x_l^TA\Delta x_k = 0\\
+    \Delta x_l^TA\Delta x_k = (\Delta x_l^TA^T)\Delta x_k &\Longrightarrow A\Delta x_l\perp \Delta x_k \textrm{, since $A$ SPD}\\
+    &\therefore (\Delta x_k)^TA\Delta x_l = 0 \textrm{ for } k \neq l
+\end{align*}
+We can work with search directions directly using the following equalities
+\begin{equation*}
+    \Delta x_k = \mu_{k+1}p_{k+1} \;\;\;\;\; p_{k+1} = r_k + \sum_{l=1}^k\tau_{lk}p_l
+\end{equation*}
+Determined by
+\begin{align*}
+    p_{k+1}' &\in span\{r_0, \dots, r_k\} = span\{p_1, \dots, p_k, r_k\} \Longrightarrow p_{k+1}' = \alpha_kr_k + \sum_{l=1}^k \tau_{lk}'p_l' \textrm{ for some } \alpha_k, \tau_{lk}'\\
+    p_{k+1} &= r_k + \sum_{l=1}^k \tau_{lk}p_l \textrm{, setting } \alpha_k = \mu_{k+1}, \;\;  p_{k+1} = \frac{1}{\mu_{k+1}}p_{k+1}' \textrm{, and } \tau_{lk} = \frac{\mu_l}{\mu_k}\tau_{lk}'
+\end{align*}
+Let $p_k' = \Delta x_{k-1}$. We rely on several properties to achieve the above\\
+\begin{itemize}
+    \item \textbf{Property:} when $x_{k+1} = x_k \Rightarrow r_{k+1} = r_k \Rightarrow r_k = 0$ since $r_k \in \mathcal{K}_{k+1} \perp r_{k+1}$
+    \item \textbf{Property:} $span\{p_1', \dots, p_l'\} = \mathcal{K}_l$
+    \begin{itemize}
+        \item $x_k, x_{k-1} \in \mathcal{K}_k \rightarrow p_k' \in \mathcal{K}_k$
+        \item $x_k \neq x_{k-1} \rightarrow \Delta x_{k-1} \neq 0 \rightarrow p_k' \notin \mathcal{K}_{k-1}$
+        \item $p_k' \in \mathcal{K}_k$ and $p_k' \notin \mathcal{K}_l$ for $l < k \Longrightarrow span\{p_1', \dots, p_l'\} = \mathcal{K}_l$
+    \end{itemize}
+    \item \textbf{Property:} $span\{r_0, \dots, r_{l-1}\} = \mathcal{K}_l$
+    \begin{itemize}
+        \item $b, Ax_{k-1} \in \mathcal{K}_k \Longrightarrow r_{k-1} = b-Ax_{k-1} \in \mathcal{K}_k$
+        \item $r_{k+1} \neq r_k \Longrightarrow r_{k-1} \notin \mathcal{K}_{k-1}$
+        \item $r_{k-1} \in \mathcal{K}_k$ and $r_{k-1} \notin \mathcal{K}_{l}$ for $l < k \Longrightarrow span\{r_0, \dots, r_{l-1}\} = \mathcal{K}_l$
+    \end{itemize}
+    \item \textbf{Property:} $span\{r_0, \dots, r_{l-1}\} = \mathcal{K}_l = span\{p_1', \dots, p_l'\}$
+    \item \textbf{Property:} $\mu_{k+1} = \frac{r_k^Tr_k}{p_{k+1}^TAp_{k+1}}$
+    \begin{align*}
+        &r_k - r_{k+1} = A\Delta x_{k+1} = \mu_{k+1}Ap_{k+1}\\
+        &p_{k+1}^Tr_k = \mu_{k+1}p_{k+1}^TAp_{k+1} \textrm{, since } - p_{k+1}^Tr_{k+1} =0\\
+        &\mu_{k+1} = \frac{p_{k+1}^Tr_k}{p_{k+1}^TAp_{k+1}} = \frac{r_k^Tr_k}{p_{k+1}^TAp_{k+1}} \textrm{, since } p_{k+1} = r_k + \tau_kp_k \Longleftrightarrow r_k^Tp_{k+1} = r_k^Tr_k
+    \end{align*}
+    \item \textbf{Property:} $\tau_k = \frac{r_k^Tr_k}{r_{k-1}^Tr_{k-1}}$
+    \begin{align*}
+        &p_{k+1} = r_k + \sum_{l=1}^k \tau_{lk}p_l\\
+        &p_k^TAp_{k+1} = p_k^TAr_k + \sum_{l=1}^k \tau_{lk}p_k^TAp_l \Longleftrightarrow 0 = p_k^TAr_k + \tau_{kk}p_k^TAp_k\\
+        &\tau_k = \frac{-p_k^TAr_k}{p_k^TAp_k} = \frac{r_k^Tr_k}{r_{k-1}^Tr_{k-1}} \textrm{, since } Ap_k = \frac{1}{\mu_k}(r_{k+1} - r_k) \Longleftrightarrow r_k^TAp_k = \frac{r_k^Tr_k}{\mu_k} \textrm{ with } \mu_k = \frac{r_{k-1}^Tr_{k-1}}{p_k^TAp_k}
+    \end{align*}
+\end{itemize}
+
+\subsubsection{Key orthogonality results}
+\begin{itemize}
+    \item $r_k \perp Q_k$, by construction of $r_k$ to minimize $\norm{r_k}{{A^{-1}}}$
+    \item $r_k \perp r_l$ for $l \neq k$, since $span\{r_0, \dots, r_{l-1}\} = \mathcal{K}_l$
+    \item $p_k \perp Ap_l$ for $l \neq k$, since $r_k, r_{k-1} \perp \mathcal{K}_{k-1}$ and $Ap_k = \frac{1}{\mu_k}A\Delta x_k = \frac{1}{\mu_k}A(r_k - r_{k-1})$ then $Ap_k \perp \mathcal{K}_{k-1}$, but for $l < k$, $p_l = \frac{1}{\mu_l}(x_l - x_{l-1}) \in \mathcal{K}_{k-1}$ so $p_l \perp Ap_k$. We can get same result for $l>k$ using $A$ SPD properties.
+    \item $r_k \perp p_l$ for $l \leq k$, TODO
+    \item $r_k \perp Ap_l$ for $l < k$ since $p_l^TAr_k = (Ap_l)^Tr_k$ with $Ap_l = \frac{1}{\mu_l}(x_l - x_{l-1}) \in \mathcal{K}_{l+1}$ and $r_k \perp \mathcal{K}_{l+1}$ for $l+1 < k+1 \Leftrightarrow l < k$
+\end{itemize}
+
+\subsubsection{Congugate Gradient algorithm}
+\begin{align*}
+    (i) & \;\textrm{Choose some } x_0 \textrm{ (could be $x_0 = 0$)}\\
+    (ii) & \; r_0 = b-Ax_0, \; p_0 = 0, \; k = 1\\
+    (iii) & \; \textrm{While } r_{k-1} \neq 0\\
+    &\tau_{k-1} = \frac{\norm{r_{k-1}}{2}^2}{\norm{r_{k-1}}{2}^2}\;,\;\;\; p_k = r_{k-1} + \tau_{k-1}p_{k-1}\;, \;\;\; \mu_k = \frac{\norm{r_{k-1}}{2}^2}{p_k^TAp_k}\;, \;\;\; x_k = x_{k-1} + \mu_kp_k\;, \;\;\;r_k = r_{k-1} - \mu_kAp_k\\
+    &k \leftarrow k+1\\
+    (iv) & \; \textrm{Return } x_{k-1}
+\end{align*}
+
+\subsection{GMRES}
+Krylov method for general matrices, Generalized Minimal Residual Method (GMRES). Error, $x-x_k = x - Q_ky$ minimized in $A^TA$ norm. Residual, $r_k$, minimized in 2-norm. O(kn) per iteration.
+\begin{align*}
+    \norm{x - x_k}{{A^TA}}^2 = (x - x_k)^TA^TA(x - x_k) = (b - Ax_k)^T(b - Ax_k) = \norm{b - Ax_k}{2}^2 = \norm{r_k}{2}^2
+\end{align*}
+We can use least squares methods to minimize $y$ in $\norm{r_k}{2}^2$:
+\begin{align*}
+    \norm{r_k}{2}^2 &= \norm{b - Ax_k}{2}^2 = \norm{Q_{k+1}Q_{k+1}^Tb - Q_{k+1}Q_{k+1}^TAQ_ky}{2}\\
+    &=\norm{Q_{k+1}(Q_{k+1}^Tb - Q_{k+1}^TAQ_ky)}{2} =\norm{Q_{k+1}^Tb - Q_{k+1}^TAQ_ky}{2} =\norm{\norm{b}{2}e_1 - H_ky}{2}
+\end{align*}
+Lastly, use givens rotations to make $H_k$ upper triangular, and then find solution $y_k$.
+
+\subsection{Preconditioning}
+The condition number and distribution of eigenvalues of $A$ influence convergence in both CG and GMRES, with clustered eigenvalues leading to faster convergence. Matrices can be conditioned, with the tradeoff being i) cost of applying a matrix preconditioner vs ii) savings from reduced iterations
+\begin{itemize}
+    \item Left preconditioning: $(M_1A)x = M_1b$
+    \item Right preconditioning: $(AM_2)z = b$, and solve $x = M_2z$
+    \item Symmetric preconditioning: $(M_1AM_2)z = M_1b$, and solve $x = M_2z$
+\end{itemize}
+
+\subsubsection{CG predonditioning}
+Choose $M$ SPD and define $C^2 = M$. CG preconditioning follows symmetric preconditioning, solving $CACy = Cb$ and $Cy=x$, but with tricks that only require computing $MA$.
+\begin{itemize}
+    \item $MA$ is similar to $CAC$ (suffice to show $\lambda(MA) = \lambda(CAC)$)
+    \begin{align*}
+        MAx = \lambda x &\Leftrightarrow CCACz = \lambda Cx \Leftrightarrow CACz = \lambda z \textrm{, for } x = Cz\\
+        CACy = \lambda y &\Leftrightarrow MACy = \lambda Cy \Leftrightarrow MAx = \lambda x \textrm{, for x = Cy}
+    \end{align*}
+    \item $MAx = Mb \Longleftrightarrow (CAC)C^{-1} = Cb$
+    \begin{align*}
+        MAx = Mb \Leftrightarrow CCAx = CCb \Leftrightarrow CACC^{-1}x = Cb
+    \end{align*}
+    \item $C^{-1}x \in \mathcal{K}(CAC, Cb, k) \Longleftrightarrow x \in \mathcal{K}(MA, Mb, k)$
+    \begin{align*}
+        C^{-1}x \in \mathcal{K}(CAC, Cb, k) &\Longleftrightarrow C^{-1}x = \alpha_0Cb + \sum_{i=1}^k\alpha_i(CAC)^iCb = \alpha_0Cb + \sum_{i=1}^k\alpha_iCA(MA)^{i-1}CCb\\
+        &\Longleftrightarrow x = \alpha_0Mb + \sum_{i=1}^k\alpha_iMA(MA)^{i-1}Mb = \sum_{i=1}^k\alpha_i(MA)^iMb \Longleftrightarrow x \in \mathcal{K}(MA, Mb, k)
+    \end{align*}
+\end{itemize}
+
+\section{Direct methods}
+TODO
+\subsection{Matrix storage}
+TODO
+\subsection{Solving triangular sparse systems}
+TODO
+\subsection{Cholesky TODO update section header}
+TODO
+\subsection{Elimination trees}
+TODO
+
+
+
 
 \end{document}
