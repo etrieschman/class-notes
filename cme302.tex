@@ -1265,7 +1265,7 @@ The above procedure takes $A$ and produces $G_L$, wich reflects the nonzero patt
     \end{itemize}
 \end{itemize}
 \subsubsection{Worked example of $A \longrightarrow E_T \longrightarrow G_L$:}
-$A \Longrightarrow E_T$
+$A \longrightarrow E_T$
 \begin{align*}
     A = \begin{bmatrix}
         X &- &X &X &X\\
@@ -1285,10 +1285,10 @@ $A \Longrightarrow E_T$
 $E_T \longrightarrow G_L$: (Relying on $L'_{k-1}l_k^T = a_k^T$)
 \begin{align*}
     &\begin{cases}
-        i=1: l_{11}l_{21} = a_{12} \Longleftrightarrow [X][l_{21}] = [0]& a_{12} = 0 \Rightarrow l_{21} = 0 \\
-        i=2: \begin{bmatrix} X & 0\\ 0 & X \end{bmatrix} \begin{bmatrix} l_{31} \\ l_{32} \end{bmatrix} = \begin{bmatrix} a_{13}\\a_{23} \end{bmatrix} = \begin{bmatrix} X\\0 \end{bmatrix}& a_{13}\neq 0 \Rightarrow l_{31} \neq 0\\
-        i=3: \begin{bmatrix} X & 0 & 0\\ 0 & X & 0\\X & 0 & X \end{bmatrix} \begin{bmatrix} l_{41} \\ l_{42} \\ l_{43} \end{bmatrix} = \begin{bmatrix} a_{14}\\a_{24} \\a_{34}\end{bmatrix} = \begin{bmatrix} X\\0\\0 \end{bmatrix} & a_{14}\neq 0 \Rightarrow l_{41} \neq 0 \Longrightarrow l_{31}\neq 0 \Rightarrow l_{43}\neq 0 \textrm{, since $3$ in reach of $1 \in G_L$}\\
-        i=4: \begin{bmatrix} X & 0 & 0&0\\ 0 & X & 0&0\\X & 0 & X &0 \\X&0&X&X\end{bmatrix} \begin{bmatrix} l_{51} \\ l_{52} \\ l_{53}\\l_{54} \end{bmatrix} = \begin{bmatrix} a_{15}\\a_{25} \\a_{35}\\a_{45}\end{bmatrix} = \begin{bmatrix} X\\X\\0\\0 \end{bmatrix} & 
+        i=1: l_{11}l_{21} = a_{12} \Longleftrightarrow [X][l_{21}] = [-]& a_{12} = 0 \Rightarrow l_{21} = 0 \\
+        i=2: \begin{bmatrix} X & -\\ - & X \end{bmatrix} \begin{bmatrix} l_{31} \\ l_{32} \end{bmatrix} = \begin{bmatrix} a_{13}\\a_{23} \end{bmatrix} = \begin{bmatrix} X\\- \end{bmatrix}& a_{13}\neq 0 \Rightarrow l_{31} \neq 0\\
+        i=3: \begin{bmatrix} X & - & -\\ - & X & -\\X & - & X \end{bmatrix} \begin{bmatrix} l_{41} \\ l_{42} \\ l_{43} \end{bmatrix} = \begin{bmatrix} a_{14}\\a_{24} \\a_{34}\end{bmatrix} = \begin{bmatrix} X\\-\\- \end{bmatrix} & a_{14}\neq 0 \Rightarrow l_{41} \neq 0 \Longrightarrow l_{31}\neq 0 \Rightarrow l_{43}\neq 0 \textrm{, since $3$ in reach of $1 \in G_L$}\\
+        i=4: \begin{bmatrix} X & - & -&-\\ - & X & -&-\\X & - & X &- \\X&-&X&X\end{bmatrix} \begin{bmatrix} l_{51} \\ l_{52} \\ l_{53}\\l_{54} \end{bmatrix} = \begin{bmatrix} a_{15}\\a_{25} \\a_{35}\\a_{45}\end{bmatrix} = \begin{bmatrix} X\\X\\-\\- \end{bmatrix} & 
         \begin{matrix}
             a_{15}\neq 0 \Rightarrow l_{51} \neq 0 \Longrightarrow l_{53}, l_{54} \neq 0 \textrm{ since $3,4$ in reach of $1 \in G_L$}\\
             a_{25}\neq 0 \Rightarrow l_{52} \neq 0 \textrm{ (but nothing else in reach of $2 \in G_L$)}
@@ -1297,5 +1297,6 @@ $E_T \longrightarrow G_L$: (Relying on $L'_{k-1}l_k^T = a_k^T$)
     G_L &= \begin{bmatrix} X & - & -&-&-\\ - & X & -&-&-\\X & - & X &-&- \\
         X&-&X&X&-\\X&X&X&X&X\end{bmatrix}
 \end{align*}
+\textbf{Notice: } $E_T \subseteq G_A$, $E_T \subseteq G_L$, $G_A \subseteq G_L$ (when undirected)
 
 \end{document}
