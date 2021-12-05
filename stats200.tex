@@ -102,11 +102,162 @@ Events $A$ and $B$ are independent if $P(A\cap B) = P(A)P(B)$
 It is possible for events to be pairwise independent, but not mutually independent. For example, toss a pair of dice and let $D_1$ be the number for die 1 and $D_2$ be the number for die 2. Define $E_i = \{D_i \leq 2\}$. And define $E_3 = \{ 3 \leq \max(D_1, D_2) \leq 4 \}$. These events are pairwise independent, but $P(E_1\cap E_2 \cap E_3) = 0$, so they are not mutually independent. 
 
 % RANDOM VARIABLES
-\section{Random variables and common distribution functions}
+\section{Random variables and expectation}
 \textbf{Random variables} are functions connecting a sample space to real numbers: $\{ \omega \in S : X(\omega) \leq t \} \in \mathcal{E}$. 
 For example, if coin tosses produce a sample space of \{Heads, Tails\}, a random variable can be the number of heads. 
 
+%EXPECTED VARIABLES
+\subsection{Expected value}
+\begin{equation*}
+    E(X) = \sum_x xP(X=x)
+\end{equation*}
+Which can also be written as
+\begin{align*}
+    E(X) &= \sum_{x \in S} X(s)p(s) \textrm{, where $p(s)$ is the probability that element $s \in S$ occurs:}\\
+    \textrm{Proof:}&\\
+    E(X) &= \sum_i x_iP(X=x_i) \textrm{, for } E_i = \{X = x_i\} = \{s \in S : X(s) = x_i\}\\
+    &= \sum_i x_i \sum_{s\in E_i} p(s) = \sum_i \sum_{s\in E_i} x_i p(s) = \sum_i \sum_{s\in E_i} X(s) p(s) = \sum_{s\in S} x_i p(s)
+\end{align*}
+This equation structure helps proof several properties of the expected value:\\
+\begin{itemize}
+    \item $E(g(X)) = \sum_i g(x_i)p_X(x_i) \textrm{, assuming } g(x_i) = y_i$ 
+    \begin{align*}
+        \sum_i g(x_i)p_X(x_i) &= \sum_j \sum_{i:g(x_i)=y_j} g(x_i) p_X(x_i) = \sum_j \sum_{i:g(x_i)=y_j} y_j p_X(x_i) = \sum_j y_j P(g(X) = x_i) = E(g(X))
+    \end{align*}
+    \item $E(aX + b) = aE(X) + b$
+    \begin{align*}
+        E(aX + b) = \sum_{s\in S} (aX(s) + b) p(s) = a\sum_{s\in S}X(s)p(s) + \sum_{s\in S}bp(s) = aE(X) + b
+    \end{align*}
+    \item $E(X + Y) = E(X) + E(Y)$
+    \begin{align*}
+        E(X + Y) = \sum_{s \in S} (X(s) + Y(s))p(s) = \sum_{s \in S} X(s)p(s) + \sum_{s \in S} Y(s)p(s) = E(X) + E(Y)
+    \end{align*}
+\end{itemize}
+
+
+\subsection{Variance}
+\begin{align*}
+    Var(X) = E((X - E(X)))^2) = \sigma^2 \; \bullet \; SD = \sqrt{Var(X)} = \sqrt{\sigma^2} = \sigma
+\end{align*}
+Several properties of variance follow from linearity of expectation:
+\begin{align*}
+    (i) \; & Var(X) = E(X^2) - \mu^2\\
+    & Var(X) = E((X - \mu)^2) = E(X^2 - 2X\mu + \mu^2) = E(X^2 - 2\mu X + \mu^2) = E(X^2) - 2\mu^2 + \mu^2 = E(X^2) - \mu^2\\ \\
+    (ii) \; & Var(aX+b) = a^2Var(X) \\
+    & Var(aX + b) = E((aX + b)^2) - E(aX + b)^2 = E(a^2X^2 + 2abX + b^2) - (aE(X)+b)^2\\
+    & Var(aX + b) =a^2E(X^2) + 2abE(X) + b^2 - a^2E(X)^2 - 2abE(X) - b^2 = a^2E(X^2) - a^2E(X)^2 = a^2(E(X^2) - E(X)^2)\\ \\
+    (iii) \; & Var(X + Y) = Var(X) + Var(Y) \textrm{ for $X,Y$ independent}\\
+    & Var(X+Y) = E((X + Y)^2) - E(X + Y)^2 = E(X^2) + 2E(XY) + E(Y^2) - E(X^2) - 2E(X)E(Y) - E(Y)^2\\
+    & Var(X+Y) = E(X^2) - E(X)^2 + E(Y^2) - E(Y)^2 \textrm{, since } E(XY) = 0 \textrm{ (by independence) and } E(X)=E(Y)=0 \textrm{ (WLOG)}\\
+    &Var(X+Y) = Var(X) + Var(Y)
+\end{align*}
+
+\subsection{Covariance}
+\begin{equation*}
+    Cov(X, Y) = E((X - E(X)(Y - E(Y)) = E(XY) - E(X)E(Y)
+\end{equation*}
+Several properties of covariance follow from linearity of expectation
+\begin{align*}
+    (i) \; & Cov(X, X) = Var(X):\\
+    & Cov(X, X) = E[(X - E(X)(X - E(X))] = E[(X - E(X))^2] = Var(X)\\ \\
+    (ii) \; & Cov(X, Y) = E(XY) - E(X)E(Y):\\
+    & Cov(X, Y) = E[(X - E(X)(Y - E(Y))] = E(XY - E(Y)X - E(X)Y + E(X)E(Y)) \\ 
+    & Cov(X, Y) = E(XY) - E(X)E(Y) - E(X)E(Y) + E(X)E(Y) = E(XY) - E(X)E(Y)\\ \\
+    (iii) \; & \textrm{if $X, Y$ independent, then} Cov(X, Y = 0)\\ \\
+    (iv) \; & Cov(aX, bY) = abCov(X, Y):\\
+    & Cov(aX, bY)= E(abXY) - E(aX)E(bY) = ab(E(XY) - E(X)E(Y)) = abCov(X, Y) \\ \\
+    (v)\; & Cov(X, Y+Z) = Cov(X, Y) + Cov(X, Z):\\
+    & Cov(X, Y+Z) = E(X(Y+Z)) - E(X)E(Y+Z) \\
+    & Cov(X, Y+Z) = E(XY) + E(XZ) - E(X)E(Y) - E(X)E(Z) = Cov(X, Y) + Cov(X, Z)\\ \\
+    (vi)\; & Cov(U, V) = \sum_i \sum_j b_id_jCov(X_i, Y_j) \textrm{, with } U = a + \sum_i b_iX_i \textrm{ and } V = c + \sum_j d_j Y_j:\\
+    (vii)\; & Var(X + Y) = Var(X) + Var(Y) + 2Cov(X, Y):\\
+    & Var (X + Y) = Cov(X+Y, X+Y) = Cov(U, V) \textrm{, for } U = V = X+Y \\
+    & Var (X + Y) = Cov(U, V) = Cov(X, X) + Cov(X, Y) + Cov(Y, Y) + Cov(Y, X) \textrm{, using $vi$} \\
+    & Var (X + Y) = Var(X) + Var(Y) + 2Cov(X, Y) 
+\end{align*}
+
+\subsection{Correlation}
+\begin{equation*}
+    \rho = \frac{Cov(X, Y)}{\sqrt{Var(X)Var(Y)}}
+\end{equation*}
+
+\subsection{Key theorems}
+\subsubsection{Iterated expectation}
+\textbf{Law of iterated expectation: } $E(E(Y\mid X)) = E(Y)$\\
+\textbf{Proof: }
+\begin{align*}
+    E(Y\mid X) &= \sum_y y\frac{f_{X, Y}(X, y)}{f_X(X)}\\
+    E(E(Y\mid X)) &= \sum_x \sum_y \left ( y\frac{f_{X, Y}(x, y)}{f_X(x)} \right ) f_X(x) = \sum_x \sum_y y f_{X, Y}(x, y) = \sum_y y f_{Y}(y) = E(Y)
+\end{align*}
+
+\subsubsection{Variance decomposition}
+\textbf{Variance decomposition formula: } $Var(Y) = E(Var(Y\mid X)) + Var(E(Y \mid X))$\\
+
+\subsubsection{Cauchy-Schwartz inequality}
+\textbf{Cauchy-Schwartz inequality: }$E(UV)^2 \leq E(U^2)E(V^2) \textrm{, with equality if } P(cU=U) = 1 \textrm{ for some constant, } c$\\
+\textbf{Proof:}
+\begin{align*}
+    \textrm{let } h(t) &= E((tU - V)^2) \geq 0, \; h(t) = t^2E(U^2) - 2tE(UV) + E(V^2) \textrm{, a quadradic equation}\\
+    h(t) \geq 0 &\Rightarrow \textrm{discriminant} \leq 0 \Longleftrightarrow 4E(UV)^2 - 4E(U^2)E(V^2) \leq 0 \Longleftrightarrow E(UV)^2 \leq E(U^2)E(V^2)\\
+\end{align*}
+
+\subsubsection{Transformations of random variables}
+For $X$ with density $f_X$ and $Y = g(X)$
+\begin{align*}
+    F_Y(y) &= P(g(X)\leq y) = P(X \leq g^{-1}(y)) = F_X(g^{-1}(y))\\
+    f_Y(y) &= \frac{d}{dy}F_X(g^{-1}(y)) = f_X(g^{-1}(y))\abs{\frac{d}{dy}g^{-1}(y)}
+\end{align*}
+\textbf{Note:} When computing $F_X(g^{-1}(y))$ be wary of how sign changes may affect the inequality.
+
+\subsubsection{Jensen inequality}
+\textbf{Jensen inequality: } $E(g(x)) \geq g(E(x))$ for $g(x)$ convex\\
+\textbf{Proof: } $\textrm{Let } E(X) = \mu \textrm{, and } L(X) \textrm{ a line s.t. } L(\mu) = g(E(x)):$
+\begin{align*}
+    g(X) \geq L(X) \textrm{ for all } X \Longleftrightarrow E(g(X)) \geq E(L(X)) = L(E(X)) = g(E(X))
+\end{align*}
+
+\subsubsection{Markov inequality}
+\textbf{Markov inequality: } For $X\geq 0 \;, \;P(X \geq t) \leq \frac{E(X)}{t} \; \; \forall t>0$\\
+\textbf{Proof: }
+\begin{align*}
+    \textrm{Let } y &= \begin{cases}
+        1 & X \geq t\\
+        0 & \textrm{otherwise}
+    \end{cases}, \textrm{  Then } tY \leq X \textrm{ since } \begin{cases}
+        X \geq t & t*1 \leq X \\
+        X < t & t*0 < X
+    \end{cases}\\
+    tY &\leq X \Longrightarrow E(tY) \leq E(X) \Longrightarrow tP(X \geq t) \leq E(X)) \Longrightarrow P(X \geq t) \leq \frac{E(X)}{t}
+\end{align*}
+
+\subsubsection{Chebyshev inequality}
+\textbf{Chebyshev inequality: } $P(\abs{X - E(X)} \geq t) \leq \frac{Var(X)}{t^2} \; \; \forall t > 0$\\
+\textbf{Proof: }
+\begin{align*}
+    P(\abs{X - E(X)} \geq t) = P((X - E(X))^2 \geq t^2) &\leq \frac{E((X - E(X))^2)}{t^2} \textrm{, by Markov inequality}\\
+    P((X - E(X))^2 \geq t^2) &\leq \frac{Var(X)}{t^2}
+\end{align*}
+
+\subsection{Moment generating function}
+The moment generating function of a random variable X is defined as 
+\begin{equation*}
+	M_X(t) = \mathbb{E}[e^{tX}] = \sum_{n=0}^\infty\frac{\mathbb{E}[X^n]}{n!}t^n \textrm{ $\leftarrow$ power series}
+\end{equation*}
+Notice its called a moment generating function because each derivative of this function can generate a new moment of $X$ at $t=0$:
+\begin{equation*}
+	M_X^{(n)}(0) = \mathbb{E}[X^n]
+\end{equation*}
+\subsubsection{Common MGF derivations}
+\begin{itemize}
+    \item $Y = a+bX \Longrightarrow M_Y = e^{at}M_X(bt)$
+    \item $Z = X+Y, X \perp Y \Longrightarrow M_Z = M_YM_X = E(e^tX)E(e^tY)$
+\end{itemize}
+
+
+
+
 % DISTRIBUTION FUNCTIONS
+\section{Common distribution functions}
 \subsection{Discrete distribution functions}
 \subsubsection{Bernoulli}
 \textbf{Probability mass function ($Bernouli(p)$):} Random variable $X$ takes the value 1 with probability $p$ and the value 0 with probability $1-p$
@@ -215,7 +366,8 @@ For example, if coin tosses produce a sample space of \{Heads, Tails\}, a random
 \textbf{Variance:} $\frac{\alpha \beta}{(\alpha + \beta)^2(\alpha + \beta + 1)}$
 
 % MARGINAL, JOINT, AND CONDITIONAL DISTRIBUTIONS
-\section{Joint, marginal, and conditional distributions}
+\section{Properties of distributions}
+Distributions provide a relationship between a random variable and the probability of observing that random variable.
 
 % JOINT DISTRIBUTIONS
 \subsection{Joint distributions}
@@ -262,155 +414,6 @@ Marginal density functions or marginal probability mass functions are obtained b
     \textrm{Recall: } p_{X|Y}(x|y) = \frac{p_{x,y}(x,y)}{p_y(y)} \textrm{ and } &f_{X\mid Y}(x \mid y) = \frac{f_{X,Y}(x, y)}{f_Y(y)}
 \end{align*}
 
-\subsubsection{Transformations of random variables}
-For $X$ with density $f_X$ and $Y = g(X)$
-\begin{align*}
-    F_Y(y) &= P(g(X)\leq y) = P(X \leq g^{-1}(y)) = F_X(g^{-1}(y))\\
-    f_Y(y) &= \frac{d}{dy}F_X(g^{-1}(y)) = f_X(g^{-1}(y))\abs{\frac{d}{dy}g^{-1}(y)}
-\end{align*}
-
-
-
-
-%EXPECTED VARIABLES
-\section{Expected variables}
-\subsection{Expected value}
-\begin{equation*}
-    E(X) = \sum_x xP(X=x)
-\end{equation*}
-Which can also be written as
-\begin{align*}
-    E(X) &= \sum_{x \in S} X(s)p(s) \textrm{, where $p(s)$ is the probability that element $s \in S$ occurs:}\\
-    \textrm{Proof:}&\\
-    E(X) &= \sum_i x_iP(X=x_i) \textrm{, for } E_i = \{X = x_i\} = \{s \in S : X(s) = x_i\}\\
-    &= \sum_i x_i \sum_{s\in E_i} p(s) = \sum_i \sum_{s\in E_i} x_i p(s) = \sum_i \sum_{s\in E_i} X(s) p(s) = \sum_{s\in S} x_i p(s)
-\end{align*}
-This equation structure helps proof several properties of the expected value:\\
-\begin{itemize}
-    \item $E(g(X)) = \sum_i g(x_i)p_X(x_i) \textrm{, assuming } g(x_i) = y_i$ 
-    \begin{align*}
-        \sum_i g(x_i)p_X(x_i) &= \sum_j \sum_{i:g(x_i)=y_j} g(x_i) p_X(x_i) = \sum_j \sum_{i:g(x_i)=y_j} y_j p_X(x_i) = \sum_j y_j P(g(X) = x_i) = E(g(X))
-    \end{align*}
-    \item $E(aX + b) = aE(X) + b$
-    \begin{align*}
-        E(aX + b) = \sum_{s\in S} (aX(s) + b) p(s) = a\sum_{s\in S}X(s)p(s) + \sum_{s\in S}bp(s) = aE(X) + b
-    \end{align*}
-    \item $E(X + Y) = E(X) + E(Y)$
-    \begin{align*}
-        E(X + Y) = \sum_{s \in S} (X(s) + Y(s))p(s) = \sum_{s \in S} X(s)p(s) + \sum_{s \in S} Y(s)p(s) = E(X) + E(Y)
-    \end{align*}
-\end{itemize}
-
-
-\subsection{Variance}
-\begin{align*}
-    Var(X) = E((X - E(X)))^2) = \sigma^2 \; \bullet \; SD = \sqrt{Var(X)} = \sqrt{\sigma^2} = \sigma
-\end{align*}
-Several properties of variance follow from linearity of expectation:
-\begin{align*}
-    (i) \; & Var(X) = E(X^2) - \mu^2\\
-    & Var(X) = E((X - \mu)^2) = E(X^2 - 2X\mu + \mu^2) = E(X^2 - 2\mu X + \mu^2) = E(X^2) - 2\mu^2 + \mu^2 = E(X^2) - \mu^2\\ \\
-    (ii) \; & Var(aX+b) = a^2Var(X) \\
-    & Var(aX + b) = E((aX + b)^2) - E(aX + b)^2 = E(a^2X^2 + 2abX + b^2) - (aE(X)+b)^2\\
-    & Var(aX + b) =a^2E(X^2) + 2abE(X) + b^2 - a^2E(X)^2 - 2abE(X) - b^2 = a^2E(X^2) - a^2E(X)^2 = a^2(E(X^2) - E(X)^2)\\ \\
-    (iii) \; & Var(X + Y) = Var(X) + Var(Y) \textrm{ for $X,Y$ independent}\\
-    & Var(X+Y) = E((X + Y)^2) - E(X + Y)^2 = E(X^2) + 2E(XY) + E(Y^2) - E(X^2) - 2E(X)E(Y) - E(Y)^2\\
-    & Var(X+Y) = E(X^2) - E(X)^2 + E(Y^2) - E(Y)^2 \textrm{, since } E(XY) = 0 \textrm{ (by independence) and } E(X)=E(Y)=0 \textrm{ (WLOG)}\\
-    &Var(X+Y) = Var(X) + Var(Y)
-\end{align*}
-
-\subsection{Covariance}
-\begin{equation*}
-    Cov(X, Y) = E((X - E(X)(Y - E(Y)) = E(XY) - E(X)E(Y)
-\end{equation*}
-Several properties of covariance follow from linearity of expectation
-\begin{align*}
-    (i) \; & Cov(X, X) = Var(X):\\
-    & Cov(X, X) = E[(X - E(X)(X - E(X))] = E[(X - E(X))^2] = Var(X)\\ \\
-    (ii) \; & Cov(X, Y) = E(XY) - E(X)E(Y):\\
-    & Cov(X, Y) = E[(X - E(X)(Y - E(Y))] = E(XY - E(Y)X - E(X)Y + E(X)E(Y)) \\ 
-    & Cov(X, Y) = E(XY) - E(X)E(Y) - E(X)E(Y) + E(X)E(Y) = E(XY) - E(X)E(Y)\\ \\
-    (iii) \; & \textrm{if $X, Y$ independent, then} Cov(X, Y = 0)\\ \\
-    (iv) \; & Cov(aX, bY) = abCov(X, Y):\\
-    & Cov(aX, bY)= E(abXY) - E(aX)E(bY) = ab(E(XY) - E(X)E(Y)) = abCov(X, Y) \\ \\
-    (v)\; & Cov(X, Y+Z) = Cov(X, Y) + Cov(X, Z):\\
-    & Cov(X, Y+Z) = E(X(Y+Z)) - E(X)E(Y+Z) \\
-    & Cov(X, Y+Z) = E(XY) + E(XZ) - E(X)E(Y) - E(X)E(Z) = Cov(X, Y) + Cov(X, Z)\\ \\
-    (vi)\; & Cov(U, V) = \sum_i \sum_j b_id_jCov(X_i, Y_j) \textrm{, with } U = a + \sum_i b_iX_i \textrm{ and } V = c + \sum_j d_j Y_j:\\
-    (vii)\; & Var(X + Y) = Var(X) + Var(Y) + 2Cov(X, Y):\\
-    & Var (X + Y) = Cov(X+Y, X+Y) = Cov(U, V) \textrm{, for } U = V = X+Y \\
-    & Var (X + Y) = Cov(U, V) = Cov(X, X) + Cov(X, Y) + Cov(Y, Y) + Cov(Y, X) \textrm{, using $vi$} \\
-    & Var (X + Y) = Var(X) + Var(Y) + 2Cov(X, Y) 
-\end{align*}
-
-\subsection{Correlation}
-\begin{equation*}
-    \rho = \frac{Cov(X, Y)}{\sqrt{Var(X)Var(Y)}}
-\end{equation*}
-
-\subsection{Key theorems}
-\subsubsection{Iterated expectation}
-\textbf{Law of iterated expectation: } $E(E(Y\mid X)) = E(Y)$\\
-\textbf{Proof: }
-\begin{align*}
-    E(Y\mid X) &= \sum_y y\frac{f_{X, Y}(X, y)}{f_X(X)}\\
-    E(E(Y\mid X)) &= \sum_x \sum_y \left ( y\frac{f_{X, Y}(x, y)}{f_X(x)} \right ) f_X(x) = \sum_x \sum_y y f_{X, Y}(x, y) = \sum_y y f_{Y}(y) = E(Y)
-\end{align*}
-
-\subsubsection{Variance decomposition}
-\textbf{Variance decomposition formula: } $Var(Y) = E(Var(Y\mid X)) + Var(E(Y \mid X))$\\
-
-\subsubsection{Cauchy-Schwartz inequality}
-\textbf{Cauchy-Schwartz inequality: }$E(UV)^2 \leq E(U^2)E(V^2) \textrm{, with equality if } P(cU=U) = 1 \textrm{ for some constant, } c$\\
-\textbf{Proof:}
-\begin{align*}
-    \textrm{let } h(t) &= E((tU - V)^2) \geq 0, \; h(t) = t^2E(U^2) - 2tE(UV) + E(V^2) \textrm{, a quadradic equation}\\
-    h(t) \geq 0 &\Rightarrow \textrm{discriminant} \leq 0 \Longleftrightarrow 4E(UV)^2 - 4E(U^2)E(V^2) \leq 0 \Longleftrightarrow E(UV)^2 \leq E(U^2)E(V^2)\\
-\end{align*}
-
-\subsubsection{Jensen inequality}
-\textbf{Jensen inequality: } $E(g(x)) \geq g(E(x))$ for $g(x)$ convex\\
-\textbf{Proof: } $\textrm{Let } E(X) = \mu \textrm{, and } L(X) \textrm{ a line s.t. } L(\mu) = g(E(x)):$
-\begin{align*}
-    g(X) \geq L(X) \textrm{ for all } X \Longleftrightarrow E(g(X)) \geq E(L(X)) = L(E(X)) = g(E(X))
-\end{align*}
-
-\subsubsection{Markov inequality}
-\textbf{Markov inequality: } For $X\geq 0 \;, \;P(X \geq t) \leq \frac{E(X)}{t} \; \; \forall t>0$\\
-\textbf{Proof: }
-\begin{align*}
-    \textrm{Let } y &= \begin{cases}
-        1 & X \geq t\\
-        0 & \textrm{otherwise}
-    \end{cases}, \textrm{  Then } tY \leq X \textrm{ since } \begin{cases}
-        X \geq t & t*1 \leq X \\
-        X < t & t*0 < X
-    \end{cases}\\
-    tY &\leq X \Longrightarrow E(tY) \leq E(X) \Longrightarrow tP(X \geq t) \leq E(X)) \Longrightarrow P(X \geq t) \leq \frac{E(X)}{t}
-\end{align*}
-
-\subsubsection{Chebyshev inequality}
-\textbf{Chebyshev inequality: } $P(\abs{X - E(X)} \geq t) \leq \frac{Var(X)}{t^2} \; \; \forall t > 0$\\
-\textbf{Proof: }
-\begin{align*}
-    P(\abs{X - E(X)} \geq t) = P((X - E(X))^2 \geq t^2) &\leq \frac{E((X - E(X))^2)}{t^2} \textrm{, by Markov inequality}\\
-    P((X - E(X))^2 \geq t^2) &\leq \frac{Var(X)}{t^2}
-\end{align*}
-
-\subsection{Moment generating function}
-The moment generating function of a random variable X is defined as 
-\begin{equation*}
-	M_X(t) = \mathbb{E}[e^{tX}] = \sum_{n=0}^\infty\frac{\mathbb{E}[X^n]}{n!}t^n \textrm{ $\leftarrow$ power series}
-\end{equation*}
-Notice its called a moment generating function because each derivative of this function can generate a new moment of $X$ at $t=0$:
-\begin{equation*}
-	M_X^{(n)}(0) = \mathbb{E}[X^n]
-\end{equation*}
-\subsubsection{Common MGF derivations}
-\begin{itemize}
-    \item $Y = a+bX \Longrightarrow M_Y = e^{at}M_X(bt)$
-    \item $Z = X+Y, X \perp Y \Longrightarrow M_Z = M_YM_X = E(e^tX)E(e^tY)$
-\end{itemize}
 
 
 % CONVERGENCE AND LIMIT THEOREMS
@@ -790,7 +793,15 @@ The \textbf{Chi-square Test of Homogeneity} tests $H_0: \pi_{i1} = \dots = \pi_{
 \subsection{Derivation of Linear regression}
 TODO
 \subsection{Confidence intervals}
-TODO
+\begin{align*}
+    \sqrt{n}\frac{\bar{X}_n - \mu}{\sigma} &\overset{d}{\longrightarrow} Z \sim N(0,1) \textrm{, by CLT for calculated } \bar{X}_n\\
+    \sqrt{n}\frac{\bar{X}_n - \mu}{\hat{\sigma}} &\overset{d}{\longrightarrow} Z \sim N(0,1) \textrm{, by Slutsky's theorem}\\
+    P(Z \leq \Phi(1-\alpha)) = P(Z \leq Z_{1-\alpha}) = 1-\alpha &\Longleftrightarrow P(Z_{\alpha \div 2} \leq Z \leq Z_{1-\alpha \div 2}) = 1-\alpha\\
+    P(Z_{\alpha \div 2} \leq \sqrt{n}\frac{\bar{X}_n - \mu}{\hat{\sigma}} \leq Z_{1-\alpha \div 2}) &= P(\frac{\hat{\sigma}}{\sqrt{n}}Z_{\alpha \div 2} \leq \bar{X}_n - \mu \leq \frac{\hat{\sigma}}{\sqrt{n}}Z_{1-\alpha \div 2})\\
+    &= P(\bar{X}_n - \frac{\hat{\sigma}}{\sqrt{n}}Z_{1-\alpha \div 2} \leq \mu \leq \bar{X}_n + \frac{\hat{\sigma}}{\sqrt{n}}Z_{1-\alpha \div 2}) \overset{d}{\longrightarrow} 1-\alpha\\
+    \mu &\in \left[\bar{X}_n \pm \frac{\hat{\sigma}}{\sqrt{n}}Z_{1-\alpha \div 2}\right] \textrm{ with } p \overset{d}{\longrightarrow} 1-\alpha
+\end{align*}
+
 \subsection{Comparing two samples}
 TODO
 \subsection{Fischer's Exact test}
