@@ -5,6 +5,8 @@
 \usepackage{hyperref}
 \usepackage{layout}
 \usepackage{geometry}
+\usepackage{listings}
+\usepackage{color}
 \newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
 \newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
 \newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
@@ -23,14 +25,34 @@
  bottom=\userMarginInMm mm,
  footskip=5mm}
 
+ \newcommand*\circled[1]{\raisebox{.5pt}{\textcircled{\raisebox{-.9pt} {#1}}}}
+
  \hypersetup{
     colorlinks=true,
     linkcolor=blue,
     filecolor=magenta,      
     urlcolor=cyan,
     pdfpagemode=FullScreen,
-    }
+}
 
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+    
+\lstset{frame=tb, language=Python,
+    aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3}
 
 %HEADERS
 % https://web.mit.edu/texsrc/source/latex/layouts/layman.pdf
@@ -1148,17 +1170,132 @@ Choose $M$ SPD and define $C^2 = M$. CG preconditioning follows symmetric precon
 \end{itemize}
 
 \section{Direct methods}
-TODO
+Direct methods are an alternative to iterative methods for solving linear systems, and take advantage of sparse data formatting.
 \subsection{Matrix storage}
-TODO
+\begin{equation*}
+    A = \begin{bmatrix}
+        4.1 & 0 & 2.9  & 0\\
+        1.2&-0.3 & 0 & -0.1\\
+        0 & 7.2 & 9.2 & 0\\
+        0 & 0 & 0 & 1.0
+    \end{bmatrix}
+\end{equation*}
+\textbf{Coordinate format (COO):} $(i, j, a_{ij})$, e.g. $COO(A) = (1, 1, 4.1), (1, 3, 2.9), \dots, (4, 4, 1.0)$\\
+\textbf{Compressed Sparse Row (CSR):} $\{nzval, colval, rowptr\}$, e.g., 
+\begin{equation*}
+    CSR(A) = \begin{cases}
+        nzval &= [4.1, 2.9, \dots, 1.0] \textrm{ (nonzero values)}\\
+        colval &= [1, 3, \dots, 4]\textrm{ (column values)}\\
+        rowptr &= [1, 3, 6, 8, 9] \textrm{ (index of nzval that starts each row)}
+    \end{cases}
+\end{equation*}
+\textbf{Compressed Sparse Column (CSC):} $\{nzval, rowval, colptr\}$, e.g., 
+\begin{equation*}
+    CSR(A) = \begin{cases}
+        nzval &= [4.1, 1.2, \dots, 1.0] \textrm{ (nonzero values)}\\
+        rowval &= [1, 2, \dots, 4]\textrm{ (row values)}\\
+        colptr &= [1, 3, 5, 7, 9] \textrm{ (index of nzval that starts each column)}
+    \end{cases}
+\end{equation*}
+\textbf{Example matrix-vector product, $Ax$:}
+
+\begin{lstlisting}
+for i=1:A.m
+    y[i] = 0.0
+    for k=A.rowptr[i]:A.rowptr[i+1]-1
+        y[i] += A.nzval[k]*x[A.colval[k]]
+    end
+end
+\end{lstlisting}
+\textbf{Conceptualizing the graph of $A, G_A$:} Edge $j \rightarrow i$ exists if $a_{ij} \neq 0$
 \subsection{Solving triangular sparse systems}
-TODO
-\subsection{Cholesky TODO update section header}
-TODO
-\subsection{Elimination trees}
-TODO
+\textbf{Dense $b$:} For $Lx=b$ with sparse lower triangular matrix, $L$, and dense vector, $b$: $x_i = \frac{1}{l_{ii}}\left(b_i - \sum_{j=1}^{i-1}l_{ij}x_j\right)$
+\begin{lstlisting}
+for i=1:A.m
+    x[i] = b[i]
+    for k=A.rowptr[i]:A.rowptr[i+1]-2
+        x[i] -= A.nzval[k]*x[A.colval[k]]
+    end
+    x[i] /= A.nzval[A.rowptr[i+1]-1]
+end
+\end{lstlisting}
+\textbf{Sparse $b$:} We can improve on this code when $b$ sparse by first determining the nonzero pattern of $x$ (nontrivial). Once we have the nonzero pattern of $x$, we can run the above code on sparse $x$. Observing the equation above we see the following rules for the nonzero pattern in $x$
+\begin{equation*}
+    x_i = \frac{1}{l_{ii}}\left(b_i - \sum_{j=1}^{i-1}l_{ij}x_j\right) \Longrightarrow 
+    \begin{cases}
+        b_i \neq 0 & \Rightarrow x_i \neq 0\\
+        \exists j<i \textrm{ s.t. } l_{ij} \neq 0 \textrm{ and } x_j \neq 0 & \Rightarrow x_i \neq 0
+    \end{cases}
+\end{equation*}
+Using \textbf{graph theory}, the statements above are equivalent to saying
+\begin{itemize}
+    \item $X$ is the set of nodes reachable from $B$, the set of nodes for which $b_i \neq 0$, on $G_L$
+    \item The reach of node $j$ is  all $i$ for which there is a path $j \rightsquigarrow i$
+    \item Use recursive backtracking ("depth-first search") to determine set $X$.
+\end{itemize}
 
+\subsection{Cholesky factorization}
+Direct methods for computing sparse Cholesky factorizations, $A=LL^T$
 
+\subsubsection{Up-looking Cholesky factorization}
+Starting with known $L'$, an upper $k \times k$ block of $L$, we can use the \textbf{up-looking Cholesky factorization} to determine the $(k+1)^{st}$ row/column of $L$
+\begin{align*}
+    (i) \;& \textrm{For $A$ SPD, initialize } L' = \sqrt{a_{11}}\\
+    (ii) \;& \textrm{For } k=2, \dots, n, \textrm{write top $k\times k$ block as } \begin{bmatrix} L' & 0\\x^T & w \end{bmatrix} \begin{bmatrix} L'^T & x\\0 & w \end{bmatrix} = \begin{bmatrix} A' & b\\b^T & a \end{bmatrix}\\
+    &\textrm{Solve } L'x=b \textrm{ for $x$, compute } w = \sqrt{a-x^Tx} \textrm{, and update/return } L' = \begin{bmatrix} L' & 0\\x^T & w \end{bmatrix}
+\end{align*}
+\textbf{Notice } $L'_{k-1}l_k^T = a_k^T$, so we can leverage the same nonzero pattern relationship as above:
+\begin{equation*}
+    l_{ij} = \frac{1}{l_{ii}}\left(a_{ij} - \sum_{k=1}^{j-1}l_{jk}l_{ik}\right) \Longrightarrow \textrm{For } j < i
+    \begin{cases}
+        a_{ij} \neq 0 & \Rightarrow l_{ij} \neq 0\\
+        \exists k<j \textrm{ s.t. } l_{jk} \neq 0 \textrm{ and } l_{ik} \neq 0 & \Rightarrow l_{ij} \neq 0
+    \end{cases}
+\end{equation*}
 
+\subsubsection{Elimination trees}
+The above procedure takes $A$ and produces $G_L$, wich reflects the nonzero pattern of $L$ in $A=LL^T$. As a special property of $A$ SPD, we can construct a more simple \textbf{Elimination Tree}, $E_T$, a graph of the first nonzero off-diagonal element in each column of $L$.\\\\
+\textbf{The elimination tree has the same reach as $G_L$:} 
+\begin{itemize}
+    \item For any $j$, let $i'$ be the smallest row index s.t., $L_{i'j}  \neq 0$. We show removing $j\rightarrow i$ from $G_L$, with $i > i'$ does not change the reach of $G_L$
+    \item \textbf{Proof:} Consider $k \in Reach(j)$ and how/if it changes after we remove edge $j \rightarrow i$:
+    \begin{itemize}
+        \item If $i$ wasn't in the path of $j \rightsquigarrow k$, then the reach is unchanged
+        \item If $i$ was in path of $j \rightarrow i \rightsquigarrow k$, the reach is still unchanged because $l_{ij}\neq 0$ and $l_{i'j} \neq 0 \Longrightarrow l_{i'i} \neq 0$, so a path, $j \rightsquigarrow k$, can still be constructed: $j \rightarrow i' \rightarrow i \rightsquigarrow k$
+    \end{itemize}
+\end{itemize}
+\subsubsection{Worked example of $A \longrightarrow E_T \longrightarrow G_L$:}
+$A \Longrightarrow E_T$
+\begin{align*}
+    A = \begin{bmatrix}
+        X &- &X &X &X\\
+        - &X &- &- &X\\
+        X &- &X &- &-\\
+        X &- & -& X &-\\
+        X &X &- &- &X
+    \end{bmatrix}
+    \longrightarrow E_T = \begin{cases}
+        i=1: & a_{11}\neq 0 \Rightarrow \circled{1} \textrm{ (only looking at or below the diagonal } \forall i)\\
+        i=2: & \circled{1}\; \mid \; a_{22}\neq 0 \Rightarrow \circled{2}\\
+        i=3: & a_{31}\neq 0 \Rightarrow \circled{1} \rightarrow \circled{3} \; \mid \; \circled{2}\\
+        i=4: & a_{41} \neq 0 \Rightarrow \circled{1} \rightarrow \circled{3} \rightarrow \circled{4} \; \mid \; \circled{2}\\
+        i=5: & a_{51} \neq 0 \Rightarrow \circled{1} \rightarrow \circled{3} \rightarrow \circled{4} \rightarrow \circled{5} \leftarrow \circled{2} \Leftarrow a_{52}\neq 0 \textrm{ (final $E_T$)}
+    \end{cases}
+\end{align*}
+$E_T \longrightarrow G_L$: (Relying on $L'_{k-1}l_k^T = a_k^T$)
+\begin{align*}
+    &\begin{cases}
+        i=1: l_{11}l_{21} = a_{12} \Longleftrightarrow [X][l_{21}] = [0]& a_{12} = 0 \Rightarrow l_{21} = 0 \\
+        i=2: \begin{bmatrix} X & 0\\ 0 & X \end{bmatrix} \begin{bmatrix} l_{31} \\ l_{32} \end{bmatrix} = \begin{bmatrix} a_{13}\\a_{23} \end{bmatrix} = \begin{bmatrix} X\\0 \end{bmatrix}& a_{13}\neq 0 \Rightarrow l_{31} \neq 0\\
+        i=3: \begin{bmatrix} X & 0 & 0\\ 0 & X & 0\\X & 0 & X \end{bmatrix} \begin{bmatrix} l_{41} \\ l_{42} \\ l_{43} \end{bmatrix} = \begin{bmatrix} a_{14}\\a_{24} \\a_{34}\end{bmatrix} = \begin{bmatrix} X\\0\\0 \end{bmatrix} & a_{14}\neq 0 \Rightarrow l_{41} \neq 0 \Longrightarrow l_{31}\neq 0 \Rightarrow l_{43}\neq 0 \textrm{, since $3$ in reach of $1 \in G_L$}\\
+        i=4: \begin{bmatrix} X & 0 & 0&0\\ 0 & X & 0&0\\X & 0 & X &0 \\X&0&X&X\end{bmatrix} \begin{bmatrix} l_{51} \\ l_{52} \\ l_{53}\\l_{54} \end{bmatrix} = \begin{bmatrix} a_{15}\\a_{25} \\a_{35}\\a_{45}\end{bmatrix} = \begin{bmatrix} X\\X\\0\\0 \end{bmatrix} & 
+        \begin{matrix}
+            a_{15}\neq 0 \Rightarrow l_{51} \neq 0 \Longrightarrow l_{53}, l_{54} \neq 0 \textrm{ since $3,4$ in reach of $1 \in G_L$}\\
+            a_{25}\neq 0 \Rightarrow l_{52} \neq 0 \textrm{ (but nothing else in reach of $2 \in G_L$)}
+        \end{matrix}
+    \end{cases}\\
+    G_L &= \begin{bmatrix} X & - & -&-&-\\ - & X & -&-&-\\X & - & X &-&- \\
+        X&-&X&X&-\\X&X&X&X&X\end{bmatrix}
+\end{align*}
 
 \end{document}
