@@ -59,10 +59,11 @@
 \begin{document}
 \maketitle
 
-% \tableofcontents
+\tableofcontents
 
 % TODO
 \section{Supervised learning overview}
+Regression problems are of the form $f(X) = E(y \mid X)$
 \subsection{Least squares}
 \subsection{Nearest neighbors}
 \subsection{Classes of restricted estimators}
@@ -140,12 +141,13 @@ Subset methods help us tradeoff an increase in bias with lower variance. Here we
 \end{itemize}
 \subsubsection{Ridge regression}
 Ridge regression is a linear regression with a square penalty on the size of the model parameters:
-% TODO -- add the alternative form of beta hat from chapter 5
 \begin{align*}
   \hat{\beta}^{ridge} &= argmin(y - X\beta)^T(y - X\beta) + \lambda\beta^T\beta\\
-  \hat{\beta}^{ridge} &= (X^TX + \lambda I)^{-1}X^Ty
+  \hat{\beta}^{ridge} &= (X^TX + \lambda I)^{-1}X^Ty\\
+  \hat{\beta}^{ridge} &= X^T(XX^T + \lambda I)^{-1}y
 \end{align*}
-This is a biased estimator for $y$ that may reduce MSE. Note when $\lambda = 0$, this is the same as OLS\\\\
+The last equation comes from i) writing $\beta$ in terms of $X^T\alpha$ (including a $\beta$ on the RHS), ii) solving for $\alpha$, iii) plugging $\alpha$ back into the equation for $\beta$, iv) left-multiplying by $X$, and v) solving for $\beta$\\\\
+Ridge regression is a biased estimator for $y$ that may reduce MSE. Note when $\lambda = 0$, this is the same as OLS\\\\
 % TODO - findings from HW1 related to the limit of lambda
 Ridge regression shrinks the coefficients of the principal components ($Xv_j$), with relatively more shrinkage on the smaller components. Proof:
 \begin{align*}
@@ -211,7 +213,7 @@ The lasso is not a linear regression. Its degrees of freedom are defined as
   df = \sum_i cov(y_i, \hat{y_i}) / \sigma^2
 \end{align*}
 
-% Todo2
+
 \section{Linear methods for classification}
 For classification, the input space can be divided into regions of constant classification, with decision boundaries
 \begin{align*}
@@ -230,6 +232,7 @@ Categorical $y \in \mathbb{R}^{n \times 1}$ is one-hot-encoded into a series of 
 \begin{itemize}
   \item Rigid nature of regression model, classes can be masked by other classes for $K > 2$
   \item A loose, but general rule is that if $K \geq 3$ classes are lined up in one direction, polynomial terms of degree $K - 1$ might be needed to resolve the classes. 
+  \item Bias has less of an effect in classification than in regression
 \end{itemize}
 
 
@@ -296,14 +299,175 @@ With these relations, $X$ can be classified through two steps
 \end{itemize}
 
 \subsection{Logistic Regression}
+Logistic regression models the posterior probabilities of $K$ classes through a linear function in $x$. Logistic regressions also ensure that the probabilities sum to one and remain in $[0,1]$. The model form is (with intercept)
+\begin{align*}
+  \log\frac{P(G=1 \mid X=x)}{P(G=K \mid X=x)} &= \beta_1^Tx\\
+  \log\frac{P(G=2 \mid X=x)}{P(G=K \mid X=x)} &= \beta_2^Tx\\
+  \vdots\\
+  \log\frac{P(G=K-1 \mid X=x)}{P(G=K \mid X=x)} &= \beta_{K-1}^Tx
+\end{align*}
+Where probabilities can be calculated as
+\begin{align*}
+  P(G=k \mid X=x) &= \frac{\exp(\beta_k^Tx)}{1 + \sum_{l=1}^{K-1}\exp(\beta_l^Tx)} \textrm{, } k \in \{1, \dots, K-1\}\\
+  P(G=K \mid X=x) &= \frac{1}{1 + \sum_{l=1}^{K-1}\exp(\beta_l^Tx)}\\
+  P(G=k \mid X=x) &= p_k(x; \theta)
+\end{align*}
+Logistic regressions are fit by maximizing the likelihood function
+\begin{align*}
+  max_\theta \left\{\sum_{i=1}^n\log p_i(x_i;\theta)\right\}
+\end{align*}
+
+\subsubsection{Additional logistic regression notes}
+We can add regularization terms to increase the robustness of our estimations
+\begin{align*}
+  \max_\theta \left\{\sum_{i=1}^n\log p_i(x_i;\theta) - \lambda \sum_{j=1}^p\abs{\beta_j}\right\}
+\end{align*}
+\textbf{Notes}
+\begin{itemize}
+  \item If two classes in a logistic regression are linearly separable, then the solution is undefined (MLE tries to achieve probabilities of 0 and 1, leading to $\hat{\beta} \rightarrow \pm\infty)$
+  \item It turns out logistic regression and LDA both model log-posterior odds between classes as a linear function of $x$. The difference lies in the way the linear coefficients are estimated. 
+  \item Logistic regression makes fewer assumptions: it leaves the marginal density of $X$, $f(x\mid k)$ as an arbitrary density function, $f(x)$ and maximizes the conditional likelihood with $f(x)$ implicitly
+  \item LDA relies on additional model assumptions, which gives us more information about parameters (lower variance). If normality of the underlying data holds, LDA is more effective
+\end{itemize}
+
+% TODO -- include why we need a pivot class for the unregularized model and why we don't for the regularized one
+\subsubsection{Pivot classes}
 
 
+\subsection{Naive Bayes models}
+Naive Bayes gives us a very simple model that assumes within-class independence. Even when this assumption isn't accurate, it can give us a good estimator with a simple implementation
+\begin{align*}
+  \textrm{Assume: } f(X\mid j) \approx \prod_{m=1}^p f_m(X_m\mid j)\\
+  P(G=k \mid X) = \frac{f(X\mid k)\pi_k}{\sum_{l=1}^Kf(X\mid l)\pi_l}
+\end{align*}
+\textbf{Notes}
+\begin{itemize}
+  \item Each component density $f_m$ is estimated separately within each class
+  \item The nearest shrunken centroid model has this structure
+  \item More general models have less bias, but are typically hard to estimate in high dimensions, so independence assumption may not hurt too much
+\end{itemize}
 
-% Todo3
+
+\subsection{Receiver operating characteristics (ROC)}
+Consider a binary classifier. To classify a new observation, $x_0$ we can threshold $P(Y=1\mid X=x_0)$ at $0.5$. Other thresholds can change the sensitivity and specificity.
+\begin{itemize}
+  \item \textit{Sensitivity}: $P(\hat{G}=1 \mid Y=1)$, the true positive rate
+  \item \textit{Specificity}: $P(\hat{G}=1 \mid Y=0)$, the true negative rate (or 1 - false positive rate)
+\end{itemize}
+We can construct a \textbf{Receiver operating characteristics (ROC)} curve by plotting the false positive rate against the true positive rate for a variety of thresholds
+
+
 \section{Basis expansions and regularizations}
+Core concept of basis expansions is to expand beyond linear models to linear basis expansions in $X$:
+\begin{align*}
+  f(X) = \sum_{m=1}^M\beta_mh_m(X) \textrm{ where }h_m(X): \mathbb{R}^p \rightarrow \mathbb{R}
+\end{align*}
+Examples include
+\begin{itemize}
+  \item $h_m(X) = X_m$, the original linear model
+  \item $h_m(X) = X_j^2$ or $X_jX_k$, polynomial terms to achieve higher-order Taylor expansions
+  \item $h_m(X) = log(X_m)$, $\sqrt{X_m}$, or $\norm{X}{2}$, nonlinear transformations
+  \item $h_m(X) = I(L_m \leq X_m < U_m)$, indicator functions
+\end{itemize}
+
 \subsection{Piecewise polynomials and regression splines}
+\textbf{This section assumes $X$ is one-dimensional}\\\\
+Polynomials are limited by their global nature (changes in a far end of the data can impact the entire model). \textbf{Piecewise polynomials} divide the domain of $X$ into contiguous intervals, representing $f$ separately in each interval. In order of complexity we have
+\begin{itemize}
+  \item Piecewise constant, defined with three basis functions
+  \begin{itemize}
+    \item $h_1(X) = I(X < \xi_1)$
+    \item $h_2(X) = I(\xi_1 \leq X < \xi_2)$
+    \item $h_3(X) = I(X \geq \xi_3)$
+  \end{itemize}
+  \item Piecewise linear, defined with 4 basis functions include the above, plus three additional basis functions, $h_{m+1} = h_m(X)X$
+  \item Piecewise cubic, adding basis functions for the quadratic and cubic terms
+  \item Piecewise linear continuous, defined with 4 basis functions (e.g., incorporating constraints that $f(\xi_1^-) = f(\xi_1^+)$)
+  \begin{itemize}
+    \item $h_1(X) = 1$
+    \item $h_2(X) = X$
+    \item $h_3(X) = (X - \xi_1)_+$ where $t_+$ denotes the positive part
+    \item $h_4(X) = (X - \xi_2)_+$
+  \end{itemize}
+  \item Piecewise cubic continuous
+  \item Piecewise cubic first-derivative continuous
+  \item Piecewise cubic second-derivative continuous (cubic spline). There is seldom a reason to go beyond cubic splines unless one is interested in smooth derivatives
+  \begin{itemize}
+    \item $h_1(X) = 1$
+    \item $h_2(X) = X$
+    \item $h_3(X) = X^2$
+    \item $h_4(X) = X^3$
+    \item $h_5(X) = (X - \xi_1)^3_+$
+    \item $h_6(X) = (X - \xi_2)^3_+$
+  \end{itemize}
+  \item Piecewise order-M spline with knots $\xi_j, j=1, \dots, K$
+  \begin{itemize}
+    \item $h_j(X) = X^{j-1}, j=1, \dots M$
+    \item $h_{m+l}(X) = (X - \xi_l)^{M-1}_+, l=1, \dots K$
+  \end{itemize}
+\end{itemize}
+\subsubsection{Additional notes}
+\begin{itemize}
+  \item Fixed-knot splines are known as \textbf{regression splines}. One needs to select the order of the spline, number of knots, and location of knots
+  \item Behavior of polynomal fits tends to be erratic near boundaries. This is exacerbated with regression splines. A \textbf{Natural cubic spline} adds additional constraints that the function is linear beyond the boundary knots, which can alleviate this issue, but may increase boundaries at the edge of the data
+\end{itemize}
+
 \subsection{Smoothing splines}
+\textbf{Smoothing splines} are a spline basis method that avoids the knot-selection problem by using a maximal set of knots (i.e., every point is a knot). The complexity of fit is controlled by regularization. It seeks a function $f(x)$ to minimize 
+\begin{align*}
+  RSS(f, \lambda) = \sum_{i=1}^n(y_i - f(x_i))^2 + \lambda \int f''(t)^2dt
+\end{align*}
+\begin{itemize}
+  \item The first term measures closeness to the data, while the second term penalizes curvature in the function. Note for $\lambda = \infty$ we get back least squares line.
+  \item Even though this objective is for an infinite class of functions, it can be shown to have an explicit, finite dimensional minimizer: a natural cubic spline with knots at the values of $x_i$
+\end{itemize}
+The solution can be rewritten as $f(x) = \sum_{j=1}^NN_j(x)\theta_j$ where $N_j(X)$ are an N-dimensional set of basis functions representing this family of natural splines. The criterion reduces to
+\begin{align*}
+  RSS(\theta, \lambda) =& (y - N\theta)^T(y-N\theta) + \lambda \theta^T\Omega_N\theta\\
+  & \textrm{ where } \{N\}_{ij} = N_j(x_i) \textrm{ and } \{\Omega_N\}_{jk} = \int N_j''(t)N_k''(t)dt\\
+  \hat{\theta} =& (N^TN + \lambda\Omega_N)^{-1}N^Ty\\
+  \hat{f}(x) &= \sum_{j=1}^NN_j(x)\hat{\theta}_j
+\end{align*}
+
+\subsubsection{Smoothing matrices}
+A smoothing spline is a linear smoother (i.e., linear operator) because the estimated parameters are a linear combination of the $y_i$
+\begin{align*}
+  \hat{y} = N(N^TN + \lambda \Omega)^{-1}N^Ty = S_\lambda y
+\end{align*}
+$S_\lambda y$ is known as the \textit{smoother matrix}
+\begin{itemize}
+  \item $S_\lambda$ only depends on $X$ and $\lambda$
+  \item Analogous to least squares hat matrix, $H = X(X^TX)^{-1}X^T$ (OLS), $H = X(X^TX + \lambda I)^{-1}X^T$ (Ridge regression)
+  \item $S_\lambda$ is a symmetric positive semidefinite matrix
+  \item While $H^TH = HH = H$ (idempotent), $S_\lambda^TS_\lambda = S_\lambda S_\lambda \preceq S_\lambda$
+  \item While $H$ has rank $p$, $S_\lambda$ has rank $N$
+  \item $df_\lambda = trace(S_\lambda)$
+\end{itemize}
+
+\subsubsection{LOO cross validation for smoothing splines}
+The leave-one-out CV curve for smoothing splines is approximately unbiased as an estimate of the EPE curve
+\begin{align*}
+  CV(\hat{f}_\lambda) &= \sum_{i=1}^N(y_i - \hat{f}^{(-i)}_\lambda(x_i))^2\\
+  &= \sum_{i=1}^N\frac{(y_i - \hat{f}_\lambda(x_i))^2}{(1 - S_\lambda(i, i))^2}
+\end{align*}
+
+\subsubsection{Smoothing spline logistic regression}
+For a binary class variable, $y$
+\begin{align*}
+  p(x) &= P(y=1 \mid x) = \frac{e^f(x)}{1 + e^f(x)}\\
+  l(f;\lambda) &= \sum_{i=1}^n[y_i \log(p(x_i)) + (1-y_i)\log(1-p(x_i))] - \frac{1}{2}\lambda \int f''(t)^2dt
+\end{align*}
+Similar argument as before, the optimal function, $f$ can be shown to be a natural cubic spline with knots at the unique values of $x_i$
+
+
 \subsection{Multidimentional splines}
+Extension of smoothing splines into more than a single dimension. Suppose $X \in \mathbb{R}^2$ with basis functions $h_{1k}(X_1)$ representing functions of parameter $X_1$ and $h_{2l}(X_2)$ representing functions of parameter $X_2$. The $M_1 \times M_2$ dimensional tensor product basis (inner product of functions for each parameter matrices) can be ued for representing a two-dimensional function
+\begin{align*}
+  g(X) = \sum_{j=1}^{M_1}\sum_{k=1}^{M_2}\theta_{jk}h_{1j}(X_1)h_{2k}(X_2)
+\end{align*}
+
+% TODO
+% You are on page 26 of the lecture notes and page 167 of the textbook
 \subsection{Regularization and reproducing kernel Hilbert spaces}
 
 
