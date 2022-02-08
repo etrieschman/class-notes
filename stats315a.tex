@@ -96,7 +96,7 @@ Assuming $X$ full rank. Geometrically, the point, $\hat{\beta}$ which solves $ar
 \end{align*}
 \textbf{Properties:}
 \begin{itemize}
-  \item Regression coefficient $\hat{\beta}$ estimates the expected change in $y$ per unit change in $x_i$ \textit{holding all other predictors fixed}
+  \item Regression coefficient $\hat{\beta}_i$ estimates the expected change in $y$ per unit change in $x_i$ \textit{holding all other predictors fixed}
   \item For $X_1, X_2$, mutually orthogonal matrices or vectors, the joint regression coefficients for $X = (X_1, X_2)$ on $y$, can be found from separate regressions. (Proof: $X_1^T(y - X\hat{\beta}) = X_1^T(y - X_1\hat{\beta}_1) = 0$)
   \item The multiple regression coefficient of $x_p$, the last column of $X$, is the same as the univariate coefficient in the regression of $y \sim z_p$. Here, $z_p = x_p - X_p^T\alpha$ (the part of $x_p$ orthogonal to $X_p$, all but column $x_p$ of $X$). Variance also comes form the univariate regression.
   \begin{itemize}
@@ -109,7 +109,7 @@ Assuming $X$ full rank. Geometrically, the point, $\hat{\beta}$ which solves $ar
   \item Errors, $\epsilon_i \sim N(0, \sigma^2)$ assumed to be \textit{independent} of the $x_i$'s
   \item $X$ considered fixed, not random. 
   \item $X$ is full rank. When not (because multiple variables are perfectly correlated), $X^TX$ is singular and the coefficients, $\hat{\beta}$, are not uniquely defined. In these cases, features can be reduced by filtering or with a regularization.
-  \item Conditional expectation of $y$ is linear in $X$, $Y = E(Y \mid X) + \epsilon$. With this assumption, we can show $\hat{\beta} \sim N(\beta, (X^TX)^{-1}\sigma^2)$
+  \item Conditional expectation of $y$ is linear in $X$, $y = E(y \mid X) + \epsilon$. With this assumption, we can show $\hat{\beta} \sim N(\beta, (X^TX)^{-1}\sigma^2)$
 \end{itemize}
 
 \subsubsection{Standard error and confidence intervals}
@@ -121,6 +121,7 @@ We often assume $y_i = \hat{\beta}x_i + \epsilon_i$ with $E(\epsilon_i) = 0$ and
 \subsubsection{Expectation of $\hat{\beta}$}
 $Var(\hat{\beta}) = (X^TX)^{-1}\sigma^2$
 $\hat{\sigma}^2 = \frac{1}{N - p - 1}\sum(y_i - \hat{y}_i)^2$. The $N-p-1$ denominator makes $\hat{\sigma}$ unbiased ($E(\hat{sigma}^2) = \sigma^2$)
+% TODO -- add results from homework
 
 \subsection{Subset selection}
 Subset methods help us tradeoff an increase in bias with lower variance. Here we retain a subset of predictor variables for the final regression.
@@ -212,9 +213,91 @@ The lasso is not a linear regression. Its degrees of freedom are defined as
 
 % Todo2
 \section{Linear methods for classification}
+For classification, the input space can be divided into regions of constant classification, with decision boundaries
+\begin{align*}
+  \{ x \mid \hat{\beta}_kx = \hat{\beta}_lx \}
+\end{align*}
+In general, linear methods for classification model \textit{discriminant functions}, $\delta_k(x)$, or \textit{posterior probabilities}, $P(G=k \mid X=x)$, for each class, classifying $x$ to the class with the largest discriminant or probability.\\
+For this theory, we require that these functions have some monotone transformation to a linear function; it turns out that both linear discriminant analysis and linear logistic regression result in linear log-odds (logits).
 \subsection{Linear regression of indicator matrix}
+Categorical $y \in \mathbb{R}^{n \times 1}$ is one-hot-encoded into a series of boolean vectors in $Y \in \mathbb{R}^{n\times k}$, and model parameters, $\hat{\beta} \in \mathbb{R}^{p \times k}$ are estimated in the same way
+\begin{align*}
+  \hat{\beta} &= (X^TX)^{-1}X^TY\\
+  \hat{Y} &= X\hat{\beta} = X(X^TX)^{-1}X^TY\\
+  \hat{G} &= argmax_{k\in \mathcal{G}} x^T\hat{\beta} \textrm{ for new observation } x
+\end{align*}
+\textbf{Notes}
+\begin{itemize}
+  \item Rigid nature of regression model, classes can be masked by other classes for $K > 2$
+  \item A loose, but general rule is that if $K \geq 3$ classes are lined up in one direction, polynomial terms of degree $K - 1$ might be needed to resolve the classes. 
+\end{itemize}
+
+
 \subsection{Linear discriminant analysis (LDA)}
+Category of backward selection models, meaning we use $y$ to generate boundaries of $X$. Suppose $f(x \mid k)$ is the density of $X$ conditional on class $G=k$, and $\pi_k$ is the prior probability for class $G=k$. Bayes rule says
+\begin{align*}
+  P(G=k \mid X=x) = \frac{f(x\mid k) \pi_k}{\sum_{l=1}^Kf(x \mid l)\pi_l}
+\end{align*}
+\textbf{Linear discriminant analysis} and its relatives are based on the assumption that $f(x \mid k)$ is multivariate Gaussian
+\begin{align*}
+  f(x \mid k) = \frac{1}{(2\pi)^{p/2}\abs{\Sigma_k}^{1/2}}\exp(-\frac{1}{2}(x - \mu_k)^T \Sigma_k^{-1}(x - \mu_k))
+\end{align*}
+\subsubsection{Linear discriminant analysis}
+LDA specifically arises out of the special case when we assume all classes have a common variance, i.e., $\Sigma_k = \Sigma \forall k$. This results in sufficient cancelations when comparing classes, leading to an equation linear in $x$
+\begin{align*}
+  \log\frac{P(G=k \mid X=x)}{P(G=k \mid X=x)} &= \log\frac{f(x \mid k)}{f(x \mid l)} + \log\frac{\pi_k}{\pi_l}\\
+  &= \log\frac{\pi_k}{\pi_l} - \frac{1}{2}(\mu_k + \mu_l)^T\Sigma^{-1}(\mu_k - \mu_l) + x^T\Sigma^{-1}(\mu_k - \mu_l)
+\end{align*}
+\textbf{Notes}
+\begin{itemize}
+  \item This implies the decision boundary between classes is linear in $x$
+  \item These decision boundaries are \textit{not} perpendicular bisectors to the line segments joining centroids (this would be the case if $\Sigma = \sigma^2\mathbf{I})$ and the priors, $\pi_i$ were equal)
+  \item In practice we don't know the parameters of the Gaussian distributions and we estimate with
+  \begin{itemize}
+    \item $\hat{\pi}_k = n_k / N$
+    \item $\hat{\mu}_k = \sum_{g_i = k}x_i/n_k$
+    \item $\hat{\Sigma}_k = \sum_{k=1}^K\sum_{g_i=k}(x_i - \hat{\mu}_k)^T(x_i - \hat{\mu}_k)/(N - K)$
+  \end{itemize}
+  \item In the case of a binary $y$, LDA and linear regression have a direct correspondence
+\end{itemize}
+
+
+\subsubsection{Quadratic discriminant analysis (QDA)}
+If we tighten our assumption about $\Sigma_k$ so that the covariance matrices are not even across groups, we get a \textbf{Quadratic discriminant analysis} that is quadratic in $x$:
+\begin{align*}
+  \delta_k(x) = \frac{1}{2}\log\abs{\Sigma_k} - \frac{1}{2}(x - \mu_k)^T\Sigma_k^{-1}(x - \mu_k) + log\pi_k
+\end{align*}
+\textbf{Notes}
+\begin{itemize}
+  \item Decision boundaries between classes are described by a quadratic equation: $\{x \mid \delta_k(x) = \delta_l(x) \}$
+  \item We can produce quadratic boundaries with LDA as well by enlarging the parameter space to include quadratics ($(x_1, x_2) \Longrightarrow (x_1, x_2, x_1x_2, x_1^2, x_2^2))$. In general, QDA is the preferred approach
+\end{itemize}
+
+\subsubsection{Regularized discriminant analysis (RDA)}
+Suposing we want to compromise between LDA and QDA, \textbf{regularized discriminant analysis} allows us to tune in between our assumptions of common across-class covariance (LDA) and unique within-class covariance (QDA) with a tuning parameter, $\alpha$. Regularized covariance matrices have the form
+\begin{align*}
+  \hat{\Sigma}_k(\alpha) = \alpha\hat{\Sigma}_k + (1 - \alpha)\hat{\Sigma}
+\end{align*}
+We can also consider a regularization approach to tune a caommon across-class covariance to an assumption about independence with tuning parameter, $\gamma$
+\begin{align*}
+  \hat{\Sigma}(\gamma) = \gamma\hat{\Sigma} + (1 - \gamma)\hat{\sigma}^2\mathbf{I} 
+\end{align*}
+
+\subsubsection{Additional LDA notes}
+We can reduce the computational complexity of LDA by taking advantage of the eigendecomposition of the covariance matrix: $\hat{\Sigma} = UDU^T$, noticing
+\begin{align*}
+  (x - \hat{\mu}_k)^T \Sigma^{-1}(x - \hat{\mu}_k) &= [U^T(x - \hat{\mu}_k)]^T D^{-1}[U^T(x - \hat{\mu}_k)]\\
+  \log\abs{\hat{\Sigma}} &= \sum_l\log d_{ll}
+\end{align*}
+With these relations, $X$ can be classified through two steps
+\begin{itemize}
+  \item Sphere data: $X^* = D^{-1/2}U^TX$ where $\hat{\Sigma} = UDU^T$ (note now that the common covariance matrix is $\mathbf{I}$)
+  \item Classify the closest class centroid in the transformed space, modulo the effect of class probabilities, $\pi_k$
+\end{itemize}
+
 \subsection{Logistic Regression}
+
+
 
 % Todo3
 \section{Basis expansions and regularizations}
