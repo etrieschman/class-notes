@@ -146,7 +146,7 @@ Ridge regression is a linear regression with a square penalty on the size of the
   \hat{\beta}^{ridge} &= (X^TX + \lambda I)^{-1}X^Ty\\
   \hat{\beta}^{ridge} &= X^T(XX^T + \lambda I)^{-1}y
 \end{align*}
-The last equation comes from i) writing $\beta$ in terms of $X^T\alpha$ (including a $\beta$ on the RHS), ii) solving for $\alpha$, iii) plugging $\alpha$ back into the equation for $\beta$, iv) left-multiplying by $X$, and v) solving for $\beta$\\\\
+See the "kernel trick" for derivation of the last equation\\\\
 Ridge regression is a biased estimator for $y$ that may reduce MSE. Note when $\lambda = 0$, this is the same as OLS\\\\
 % TODO - findings from HW1 related to the limit of lambda
 Ridge regression shrinks the coefficients of the principal components ($Xv_j$), with relatively more shrinkage on the smaller components. Proof:
@@ -418,7 +418,8 @@ Polynomials are limited by their global nature (changes in a far end of the data
   RSS(f, \lambda) = \sum_{i=1}^n(y_i - f(x_i))^2 + \lambda \int f''(t)^2dt
 \end{align*}
 \begin{itemize}
-  \item The first term measures closeness to the data, while the second term penalizes curvature in the function. Note for $\lambda = \infty$ we get back least squares line.
+  \item The first term measures closeness to the data, while the second term penalizes curvature in the function. 
+  \item Note for $\lambda = \infty$ we get back least squares line. For $\lambda = 0$ the data interpolates every point
   \item Even though this objective is for an infinite class of functions, it can be shown to have an explicit, finite dimensional minimizer: a natural cubic spline with knots at the values of $x_i$
 \end{itemize}
 The solution can be rewritten as $f(x) = \sum_{j=1}^NN_j(x)\theta_j$ where $N_j(X)$ are an N-dimensional set of basis functions representing this family of natural splines. The criterion reduces to
@@ -434,7 +435,7 @@ A smoothing spline is a linear smoother (i.e., linear operator) because the esti
 \begin{align*}
   \hat{y} = N(N^TN + \lambda \Omega)^{-1}N^Ty = S_\lambda y
 \end{align*}
-$S_\lambda y$ is known as the \textit{smoother matrix}
+$S_\lambda y$ is known as the \textit{smoother matrix} that takes a weighted average of y near the target window
 \begin{itemize}
   \item $S_\lambda$ only depends on $X$ and $\lambda$
   \item Analogous to least squares hat matrix, $H = X(X^TX)^{-1}X^T$ (OLS), $H = X(X^TX + \lambda I)^{-1}X^T$ (Ridge regression)
@@ -457,7 +458,7 @@ For a binary class variable, $y$
   p(x) &= P(y=1 \mid x) = \frac{e^f(x)}{1 + e^f(x)}\\
   l(f;\lambda) &= \sum_{i=1}^n[y_i \log(p(x_i)) + (1-y_i)\log(1-p(x_i))] - \frac{1}{2}\lambda \int f''(t)^2dt
 \end{align*}
-Similar argument as before, the optimal function, $f$ can be shown to be a natural cubic spline with knots at the unique values of $x_i$
+Similar argument as before, the optimal function, $f$ can be shown to be a natural cubic spline with knots at the unique values of $x_i$. This leads to a \textbf{nonparametric} logistic regression
 
 
 \subsection{Multidimentional splines}
@@ -466,9 +467,36 @@ Extension of smoothing splines into more than a single dimension. Suppose $X \in
   g(X) = \sum_{j=1}^{M_1}\sum_{k=1}^{M_2}\theta_{jk}h_{1j}(X_1)h_{2k}(X_2)
 \end{align*}
 
-% TODO
-% You are on page 26 of the lecture notes and page 167 of the textbook
+
 \subsection{Regularization and reproducing kernel Hilbert spaces}
+\subsubsection{The kernel trick}
+The \textit{kernel trick} is useful in scenarios when $M \gg N$. It allows us to write a ridge solution for $\hat{y}$ that only requires inversion of an $N \times N$ matrix (as opposed to an $M \times M$ matrix normally)
+\begin{align*}
+  \textrm{Objective: }& R(\beta) = (y - H\beta)^T(y - H\beta) + \lambda \beta^T \beta \textrm{ for } f(x) = h(x)^T\beta, H = \{h_j(x_i)\}_{N\times M}\\
+  \textrm{Solution: }& \hat{y} = H(H^TH + \lambda I)^{-1}H^Ty \textrm{ requiring inverse of MxM matrix}\\
+  \textrm{Rewritten solution: }& \hat{y} = HH^T(HH^T + \lambda I)^{-1}Hy \textrm{ requiring inverse of NxN matrix}
+\end{align*}
+Proof: Starting with the derivative condition
+\begin{align*}
+  \frac{\partial R}{\partial \beta} = 0 \Longleftrightarrow& -2H^T(y - H\beta) + 2\lambda \beta = 0\\
+  \hat{\beta} =& H^T(y - H\hat{\beta}) = H^T\alpha\\
+  HH^T(y - HH^T\alpha) =& \lambda HH^T\alpha \textrm{, plugging in and left multiplying by } H\\
+  \alpha =& (HH^T + \lambda I)^{-1}y\\
+  \hat{\beta} =& H^T\alpha = H^T(HH^T + \lambda I)^{-1}y
+\end{align*}
+Note that $HH^T$ is $N\times N$ and the inner product of all $h(x_i)^Th(x_j)$. For a function $K(x, x') = h(x)^Th(x')$, we can let $K=HH^T$ and get 
+\begin{align*}
+  \hat{y} &= h(x)^T\beta = \sum_{i=1}^N\hat{\alpha}_iK(x, x_i)\\
+  \hat{\alpha} &= (K + \lambda I)^{-1}y\\
+  \hat{\beta}^T\hat{\beta} &= \hat{\alpha}^TK\hat{\alpha}
+\end{align*}
+
+\subsubsection{Kernel examples}
+\begin{itemize}
+  \item Polynomial kernel: $K(x, x') = (1 + x^Tx')^d$
+  \item Radial kernel: $K(x, x') = \exp(-\gamma\norm{x-x'}{p}^2)$; $\gamma$ controls the width of the kernel
+\end{itemize}
+$f(x)$ in turn is a weighting of all these kernels at each point $x$.
 
 
 \end{document}
