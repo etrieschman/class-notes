@@ -68,8 +68,9 @@ A large subset of the most popular techniques use variants of linear regression 
 \subsection{Nearest neighbors}
 The k-nearest neighbor fit for $\hat{y}$ is 
 \begin{align*}
-  \hat{y} = f(x) = \frac{1}{k}\sum_{x_i \in N_{k(x)}}y_i
+  \hat{y} = f(x_0) = \frac{1}{k}\sum_{x_i \in N_{k(x_0)}}y_i
 \end{align*}
+Degrees of freedom is $N/k$
 \subsubsection{Curse of dimensionality}
 Any method that attemps to produce locally varying functions in small neighborhoods will have issues in high dimensions because of the \textbf{curse of dimensionality}. All sample points are close to an edge of the sample in high dimensions\\\\
 For point $p$ sampled uniformly within a p-dimensional sphere, the probability that $p$ is within $\epsilon$ of the boundary goes to 1
@@ -81,11 +82,44 @@ For point $p$ sampled uniformly within a p-dimensional sphere, the probability t
 \end{align*}
 Extension: The angle between two points sampled uniformly on a unit ball tends to 90 degrees
 
-% TODO
-\subsection{Statistical decision theory}
 
-% TODO
+\subsection{Statistical decision theory}
+The components of statistical decision theory are
+\begin{itemize}
+  \item A loss function, $L(y, f(X))$
+  \item The expected prediction error $EPE(f) = E[L(y, f(X))]$
+\end{itemize}
+
+\subsubsection{Quantitative output $y$}
+For quantitative outputs we focus on regression models. 
+\begin{align*}
+  \textrm{Often, } L(y, f(X)) =& (y - f(X))^2\\
+  \textrm{So } EPE(f) =& E[(y - f(X))^2]\\
+  =& E_X[E_{y\mid x}[(y - f(x))^2 \mid X]]\\
+  \textrm{Minimizing EPE leads to } \hat{f}(x) =& E(y \mid X=x) \textrm{, the regression function}
+\end{align*}
+Note EPE can be rewritten as the sum of irreducible error of the predicted value plus the MSE of the predicted value. 
+
+\subsubsection{Categorical output $G$}
+For categorical outputs, we focus on classification models. Our prediction rule, $\hat{G}(X)$ takes values in $\mathcal{G}$ with $card(\mathcal{G}) = K$\\
+The loss function for a categorical output is the cost of misclassifying category $\mathcal{G}_k$ as category $\mathcal{G}_l$, $L(k, l)$. Most common is the 0-1 loss function where all misclassifications are charged 1. 
+\begin{align*}
+  EPE =& E[L(G, \hat{G}(X))]\\
+  \textrm{With solution } \hat{G}(x) =& argmin_{g\in\mathcal{G}}\sum_{k=1}^KL(\mathcal{G}_k, g)P(\mathcal{G}_k \mid X = x) 
+\end{align*}
+
+
+
 \subsection{Bias-Variance tradeoff}
+Minimizing training error can lead to overfitting, especially as we increase the number of parameters in the model. Overfit models are unlikely to predict future data well.\\\\
+The expected prediction error, EPE, of test data, $x_0$ is composed of three components
+\begin{itemize}
+  \item $\sigma^2$, the irriducible error, representing the variance of the new test target
+  \item $Bias^2(\hat{f}(x_0))$, which is $(E[\hat{f}(x_0)] - f(x_0))^2$
+  \item $Var(\hat{f}(x_0))$, which is $E[(\hat{f}(x_0))^2] - (E[\hat{f}(x_0)])^2$
+\end{itemize}
+In general as model complexity increases (e.g., fewer nearest neighbors), variance of the predicted value tends to increase and squared bias of the predicted value tends to decrease\\\\
+Test error is a good metric to evaluate the bias-variance tradeoff. Training error is not because it does not properly account for model complexity (i.e., training error tends to decrease with model complexity).
 
 
 \subsection{Cross validation}
@@ -125,13 +159,13 @@ Functions in the real world are rarely linear, but linear approximations are a g
 Assuming $X$ full rank. Geometrically, the point, $\hat{\beta}$ which solves $argmin_x\norm{X\hat{\beta} - y}{2}$ is one where $X\hat{\beta} - y$ is orthogonal to the range of $X$. To solve for this:
 \begin{align*}
     \textrm{Want: } (X\hat{\beta} - y) &\perp \{z \vert z = X\hat{\beta}\} \longleftrightarrow (X\hat{\beta} - y) \perp range(A) \longleftrightarrow (X\hat{\beta} - y) \perp x_i, \forall i \in X\\
-    x_i^T(X\hat{\beta} - y) &= 0, \; \forall i \in X \longleftrightarrow X^T(X\hat{\beta} - y) = 0 \longleftrightarrow \hat{\beta} = (X^TX)^{-1}X^TY
+    x_i^T(X\hat{\beta} - y) &= 0, \; \forall i \in X \longleftrightarrow X^T(X\hat{\beta} - y) = 0 \longleftrightarrow \hat{\beta} = (X^TX)^{-1}X^Ty
 \end{align*}
 \textbf{Properties:}
 \begin{itemize}
   \item Regression coefficient $\hat{\beta}_i$ estimates the expected change in $y$ per unit change in $x_i$ \textit{holding all other predictors fixed}
   \item For $X_1, X_2$, mutually orthogonal matrices or vectors, the joint regression coefficients for $X = (X_1, X_2)$ on $y$, can be found from separate regressions. (Proof: $X_1^T(y - X\hat{\beta}) = X_1^T(y - X_1\hat{\beta}_1) = 0$)
-  \item The multiple regression coefficient of $x_p$, the last column of $X$, is the same as the univariate coefficient in the regression of $y \sim z_p$. Here, $z_p = x_p - X_p^T\alpha$ (the part of $x_p$ orthogonal to $X_p$, all but column $x_p$ of $X$). Variance also comes form the univariate regression.
+  \item The multiple regression coefficient of $x_p$, the last column of $X$, is the same as the univariate coefficient in the regression of $y \sim z_p$. Here, $z_p = x_p - X_p^T\alpha$ (the part of $x_p$ orthogonal to $X_p$, all but column $x_p$ of $X$). Variance also comes from the univariate regression.
   \begin{itemize}
     \item $\hat{\beta_p} = (z_p^Tz_p)^{-1}z_p^Ty = z_p^Ty / z_p^Tz_p$
     \item $Var(\hat{\beta_p}) = \sigma^2 / z_p^Tz_p$
@@ -166,7 +200,7 @@ We often assume $y_i = \hat{\beta}x_i + \epsilon_i$ with $E(\epsilon_i) = 0$ and
 Subset methods help us tradeoff an increase in bias with lower variance. Here we retain a subset of predictor variables for the final regression.
 \textbf{Approaches:}
 \begin{itemize}
-  \item All subsets regression: finds the best subset of size $s \in \{1, \dots, p\}$ that minimizes the residual sum of squares. Limited use in high dimensions (>30) because of the computational complexity. 
+  \item All subsets regression: finds the best subset of size $s \in \{1, \dots, p\}$ that minimizes the residual sum of squares. Limited use in high dimensions ($>30$) because of the computational complexity. 
   \item Forward stepwise selection: beginning with a model of the intercept only, sequentially add to the model the predictor that most reduces the residual sum of squares
   \item Backward stepwise selection: beginning with the full OLS model, sequentially remove from the model the predictor to most reduce residual sum of squares
 \end{itemize}
