@@ -396,6 +396,46 @@ Algorithmic methods for writing functions to determine concavity and convexity
   \item \href{https://www.cvxpy.org/tutorial/dcp/}{CVXPy DCP tutorial}
 \end{itemize}
 
+\section{Applied concepts}
+\subsection{How to set up an applied problem}
+\begin{itemize}
+  \item Write down all variables
+  \item Write down all constants
+  \item Write out the size of all variables and constants (e.g., $x\in \mathbb{R}^n$)
+  \item Write out optimization problem in a DCP compliant way
+  \item Write out all constraints in a DCP compliant way
+\end{itemize}
+
+\subsection{Constructing the dual of a perturbed problem}
+Take the original primal problem and its dual. Assume convexity and strong duality\\
+\begin{align*}
+  \textrm{\textbf{Primal: }}
+  min. & \;\; f_0(x)\\
+  s.t. & \;\; f_i(x) \leq 0\\
+  & \; h_i(x) = 0\\
+  \textrm{\textbf{Dual: }}
+  min. & \;\; g(\lambda, \nu) = \inf_x\{L(\lambda, \nu)\} = \inf_x\{f_0(x) + \sum_i\lambda_if_i(x) + \sum_j\nu_jh_j(x)\}\\
+  s.t. & \;\; \lambda \preceq 0\\
+  \textrm{\textbf{Perturbed primal: }}
+  min. & \;\; f_0(x)\\
+  s.t. & \;\; f_i(x) \leq u_i\\
+  & \;\; h_i(x) = v_i\\
+  \textrm{\textbf{Perturbed dual: }}
+  min. & \;\; g_{pert}(\lambda, \nu) = \inf_x\{L_{pert}(\lambda, \nu)\}\\
+  &= \inf_x\{f_0(x) + \sum_i\lambda_i(f_i(x) - u_i) + \sum_j\nu_j(h_j(x) - v_i)\}\\
+  &= \inf_x\{f_0(x) + \sum_i\lambda_if_i(x) + \sum_j\nu_jh_j(x)\} - \lambda^Tu - \nu^Tv\\
+  &= g(\lambda, \nu)- \lambda^Tu - \nu^Tv \textrm{, written as a function of the original lagrangian dual problem}\\
+  s.t. & \;\; \lambda \preceq 0\\  
+\end{align*}
+Now, by properties of strong and weak duality we have
+\begin{align*}
+  f_0(\tilde{x}) &\geq g_{pert}(\tilde{\lambda}, \tilde{\mu}) \textrm{, by weak duality for any feasible values}\\
+  p^*_{pert}(u, v) &\geq g_{pert}(\lambda, \mu) \text{, by weak duality, since the prior result holds for all values}\\
+  p^*_{pert}(u, v) &\geq g_{pert}(\lambda^*, \mu^*) \text{, the optimal values of the original problem}\\
+  &= g(\lambda^*, \mu^*) - \lambda^{*T}u - \nu^{*T}v \text{, rewriting equality from above}\\
+  &= p^*(0,0) - \lambda^{*T}u - \nu^{*T}v \text{, from strong duality of } p^*(0,0) = g(\lambda^*, \nu^*)\\
+\end{align*}
+
 \section{Additional resources}
 \begin{itemize}
   \item \href{https://web.stanford.edu/class/ee364a/solutions/midterm_19_sol.pdf}{2019 Practice Midterm}
