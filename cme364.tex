@@ -436,12 +436,39 @@ Now, by properties of strong and weak duality we have
   &= p^*(0,0) - \lambda^{*T}u - \nu^{*T}v \text{, from strong duality of } p^*(0,0) = g(\lambda^*, \nu^*)\\
 \end{align*}
 
+\section{Assorted techniques}
+\subsection{...for constructing convex problems}
+\begin{itemize}
+  \item Monotonicity of functions
+  \item Condition on maximum of functions $\Longrightarrow$ condition on each individual function within the maximum
+  \item homogenous functions
+  \item change of variables: perspective, $g(x, t) = tf(x/t)$
+  \item change of varibles: replace a log of a variable with a new variable (e.g., $y = \log x$). This may lead to creating a perspective function
+  \item change of variables: replace a product of two variables with a single variable (e.g., $z = x/y$, $z = xy$)
+  \item scale variables in the problem -- can the variables be scaled without changing the objective or constraints?
+  \item or scale variables after solving the problem, i.e., $x = \tilde{x} / (1^T\tilde{x})$
+  \item keep things in norms and try to rewrite norms as subcomponents
+  \item When working with functions of the form $(x_i)_-$ and $(x_i)_+$, breaking it into two vectors: $x_+ \succeq 0, x_- \succeq 0, x = x_+ - x_-$
+  \item The geometric mean, $g(u,v) = \sqrt{uv}$ is concave
+  \item Change of variables for normal distribution: $\theta = \Sigma^{-1}$, $\omega = \Sigma^{-1}\mu$
+  \item Logarithms and maximums: $\max(\log f(x), \log g(x)) = \log\max(f(x), g(x))$
+\end{itemize}
+\subsection{...for coding in CVXPY}
+\begin{itemize}
+  \item Define variable constraints in the variable definition \verb|cp.Variable(n, nonneg=True)| or \verb|cp.Variable((m, n), PSD=True)|
+  \item Axis-level norms: \verb|cp.norm(u, 2, axis=0)|
+  \item sum of squares: \verb|cp.sum_squares()|
+\end{itemize}
+
+
 \section{Additional resources}
 \begin{itemize}
   \item \href{https://web.stanford.edu/class/ee364a/solutions/midterm_19_sol.pdf}{2019 Practice Midterm}
   \item \href{https://web.stanford.edu/class/ee364a/solutions/hw/2022_hw1sol.pdf}{HW 1 Solutions}
   \item \href{https://web.stanford.edu/class/ee364a/solutions/hw/2022_hw2sol.pdf}{HW 2 Solutions}
   \item \href{https://edstem.org/us/courses/16230/discussion/}{Ed discussion}
+  \item \href{https://web.stanford.edu/class/ee364a/solutions/final_17_sol.pdf}{Final 2017 solutions}
+  \item \href{https://web.stanford.edu/class/ee364a/solutions/final_19_sol.pdf}{Final 2019 solutions}
 \end{itemize}
 
 
