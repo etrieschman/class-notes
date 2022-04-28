@@ -395,7 +395,7 @@ The distribution of a sum of random variables is called a \textbf{convolution}. 
     F_{X+Y}(t) &= P(X+Y\leq t) = P(X \leq t-y)\\
     &= \int_{-\infty}^\infty P(X \leq t-y \mid Y=y) f_x(y)dy \textrm{, to get marginal distribution}\\
     &= \int_{-\infty}^\infty F_x(t-y) f_Y(y)dy \textrm{, since $X,Y$ independent}\\
-    f_{X+Y}(t) &= \int_{-\infty}^\infty f_x(t-y) f_x(y)dy\\
+    f_{X+Y}(t) &= \int_{-\infty}^\infty f_X(t-y) f_Y(y)dy\\
     p_{X + Y}(t) &= P(X+Y = t) = \sum_{x=-\infty}^{\infty} p_X(t-y) p_Y(y)
 \end{align*}
 
