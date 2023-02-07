@@ -1,0 +1,240 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,amssymb}
+\usepackage{lipsum}
+\usepackage{hyperref}
+\usepackage{layout}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{pdfpages}
+\usepackage{booktabs}
+\newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+\newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+
+\title{Econ271: Economectrics II, linear regression}
+\author{Erich Trieschman}
+\date{2023 Winter quarter class notes}
+
+
+\newcommand{\userMarginInMm}{8}
+\geometry{
+ left=\userMarginInMm mm,
+ right=\userMarginInMm mm,
+ top=\userMarginInMm mm,
+ bottom=\userMarginInMm mm,
+ footskip=5mm}
+
+\newcommand*\circled[1]{\raisebox{.5pt}{\textcircled{\raisebox{-.9pt} {#1}}}}
+\newcommand*\bspace{$\; \bullet \;$}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdfpagemode=FullScreen,
+}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+    
+\lstset{frame=tb, language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3}
+
+\begin{document}
+\maketitle
+
+% \tableofcontents
+
+\section{Regression models}
+Goal: Estimate $E[Y \mid X]$, oftentimes given $(y_i, x_i) \overset{iid}{\sim} P_\theta$
+Probability theory: $P_\theta \rightarrow \mathcal{P}_n$
+Statistics: $\mathcal{P}_n \rightarrow P_\theta$
+\subsection{Estimator properties}
+\begin{itemize}
+  \item \textbf{Identification:} Parameters of interest can be identified using joint distribution of observable variables and distribution assumptions. E.g., for $Y \sim N(\mu, \sigma^2), \mu = E_{\theta = (\mu, \sigma^2)}[Y]$, but for $Y \sim N(\mu_1 + \mu_2, \sigma^2)$, we can't identify $\mu_1, \mu_2$
+  \item \textbf{Unbiased:} $E_\theta[\hat{\mu}] = \mu$
+  \item \textbf{Admissibility:} Admissible if not inadmissible, where inadmissible means $\exists \tilde{\mu} s.t. E_\theta[(\hat{\mu} - \mu)^2] \geq E_\theta[(\tilde{\mu} - \mu)^2] \forall \theta$
+  \item \textbf{Efficiency:} $Var_\theta(\hat{\mu}) \leq Var_\theta(\tilde{\mu}) \forall \tilde{\mu}$ unbiased
+  \item \textbf{Consistency:} $\hat{\mu} \overset{p}{\longrightarrow} \mu$
+  \item \textbf{Asymptotic distribution:} $\sqrt{n}(\hat{\mu} - \mu) \overset{d}{\longrightarrow} N(0, \sigma^2)$
+\end{itemize}
+
+\section{Linear regression and the OLS estimator}
+\begin{align*}
+  y &= x^T\beta + \epsilon, \textrm{, where }\\
+  E[\epsilon \mid x] &= 0 \Longrightarrow E[y \mid x] = x^T\beta \textrm{ since } E[y \mid x] = E[x^T\beta + \epsilon \mid x] \textrm{(correct specification)}\\
+  Var(\epsilon \mid x) &= \sigma^2 \textrm{ (homoskedasticity)}
+\end{align*}
+
+\subsection{Identification}
+\begin{align*}
+  \beta &= E[xx^T]^{-1}E[xy], \textrm{ since }\\
+  \beta &= \beta E[xx^T]^{-1}E[xx^T] = E[xx^T]^{-1}E[xx^T\beta] = E[xx^T]^{-1}E[xE[y\mid x]] = E[xx^T]^{-1}E[E[xy\mid x]] = E[xx^T]^{-1}E[xy]\\
+  \beta &= argmin_b E[(y - x^Tb)^2] \overset{FOC}{\longrightarrow} E[2x(y - x^T\hat{\beta})] = 0 \Longrightarrow E[xy] = E[xx^T]\hat{\beta}, \textrm{ noting this requires $E[xx^T]$ invertible}
+\end{align*}
+
+\subsection{Estimation}
+\begin{align*}
+  \hat{\beta} =& argmin_b E_n[(y - x^Tb)^2] = argmin_b \frac{1}{n}\sum_{i=1}^n(y - x^Tb)^2 = argmin_b (y - X\beta)^T(y - X\beta)\\
+  & \overset{FOC}{\longrightarrow} \hat{\beta} = \left(\frac{1}{n}\sum_{i=1}^n x_ix_i^T\right)^{-1} \frac{1}{n}\sum_{i=1}^n x_iy_i = (X^TX)^{-1}X^Ty, \textrm{ again requiring $X^TX$ invertible}
+\end{align*}
+Note by construction, the first order condition is $E[x(y - x^T\beta)] = 0 = E[x\epsilon]$. This is a fact of the estimator.
+
+\subsubsection{Estimate as ratio of covariance to variance}
+TODO (see notes and homework)
+
+\subsection{Bias}
+\begin{align*}
+  E[\hat{\beta}\mid X] =& E[(X^TX)^{-1}X^Ty \mid X] = (X^TX)^{-1}X^TE[y\mid X]\\
+  =& (X^TX)^{-1}X^TX\beta = \beta \textrm{ when correctly specified, since } E[y\mid X] = X\beta
+\end{align*}
+
+\subsection{Variance}
+\begin{align*}
+  Var(\hat{\beta} \mid X) &= Var((X^TX)^{-1}X^Ty \mid X) = Var((X^TX)^{-1}X^TX\beta + (X^TX)^{-1}X^TE \mid X) \\
+  &= (X^TX)^{-1}X^T Var(X^TE\mid X) X (X^TX)^{-1} = (X^TX)^{-1}X^T Var(x\epsilon \mid x) X (X^TX)^{-1}\\
+  &= (X^TX)^{-1}X^T \sigma^2 X (X^TX)^{-1} = \sigma^2 (X^TX)^{-1} \textrm{ under homoskedasticity assumption}
+\end{align*}
+
+\subsubsection{Asymptotic variance}
+\begin{align*}
+  \sqrt{n}(\hat{\beta} - \beta) =& \sqrt{n}((X^TX)^{-1}Xy - \beta) \textrm{, for $X$ data matrix of $x_i$, $y$ data vector of $y_i$, $(y_i, x_i)$ iid}\\
+  =& \sqrt{n}((X^TX)^{-1}Xy - (X^TX)^{-1}(X^TX)\beta) = \sqrt{n}(X^TX)^{-1}(Xy - X^TX\beta) \\
+  =& (X^TX)^{-1}\left(\sqrt{n}(X^T(X\beta + E)) - X^TX\beta\right) = (X^TX)^{-1}\left(\sqrt{n}X^TE\right) \\
+  &(X^TX) \overset{p}{\longrightarrow} E[xx^T] \textrm{ (LLN) } \Longrightarrow (X^TX)^{-1} \overset{p}{\longrightarrow} E[xx^T]^{-1} \textrm{ (continuous mapping theorem)}\\
+  &\sqrt{n}(X^TE - 0) = \sqrt{n}(X^TE - E[E[x\epsilon\mid x]]) = \sqrt{n}(X^TE - E[x\epsilon]) \overset{d}{\longrightarrow} N(0, Var(x\epsilon))\\
+  &\overset{d}{\longrightarrow} N(0, E[xx^T]^{-1}Var(x\epsilon)E[xx^T]^{-1})\\
+  &\overset{d}{\longrightarrow} N(0, E[xx^T]^{-1}E[x\epsilon^2x^T]E[xx^T]^{-1}) \textrm{ for } Var(x\epsilon) = E[(x\epsilon)(x\epsilon)^T] = E[x\epsilon^2x^T]
+\end{align*}
+
+Depending on correct specification and homoskedasticity, the asymptotic variance can be simplified
+\begin{align*}
+  Var(x\epsilon) =& Var(E[x\epsilon \mid x]) + E[Var(x\epsilon \mid x)] = Var(xE[\epsilon \mid x]) + E[xVar(\epsilon\mid x)x^T]\\
+  =& 0 + E[xVar(\epsilon\mid x)x^T] \textrm{ under correct specification}\\
+  =& Var(xE[\epsilon \mid x]) + \sigma^2E[xx^T] \textrm{ under homoskedasticity}\\
+  =& \sigma^2E[xx^T] \textrm{ under both, leading to } \sqrt{n}(\hat{\beta} - \beta) \overset{d}{\longrightarrow} N(0, \sigma^2E[xx^T]^{-1})
+\end{align*}
+
+\subsection{Efficiency of linear regression}
+\subsubsection{Gauss-Markov Theorem}
+\textbf{Theorem:} Under assumptions below, OLS is Best Linear Unbiased Estimator (BLUE), where best is defined with respect to $Var(\hat{\beta})$\\
+\textbf{Assumptions:}
+\begin{itemize}
+  \item Correct specification (alternative: no omitted variable bias): $E[\epsilon_i \mid x_i] = 0$
+  \item Homoskedasticity: $Var(\epsilon_i \mid x_i) = \sigma^2$
+  \item No colinearity of regressors: $X^TX$ invertible when $x_i \in \mathbb{R}^{k>1}$, or $Var(x) > 0$ when $x_i \in \mathbb{R}$
+\end{itemize}
+\textbf{Proof sketch:}
+\begin{itemize}
+  \item Want to show: $Var(\hat{\beta}) \preceq Var(\tilde{\beta}) \forall \tilde{\beta}$ linear and unbiased
+  \item Suffice to show: $Var(\tilde{\beta}) - Var(\hat{\beta}) \preceq 0 \Longrightarrow  Var(\tilde{\beta}) - Var(\hat{\beta}) \in S_{++}$
+  \item Note $\tilde{\beta} = Wy \Longrightarrow WX = I$ since $E[\tilde{\beta}\mid X] = \beta \Longrightarrow WX\beta = \beta$
+  \item Note $\tilde{\beta} = \hat{\beta} + W(I - X(X^TX)^{-1}X^T)y$
+  \item Note $Cov(\hat{\beta}, W(I - X(X^TX)^{-1}X^T)y) = 0$
+  \item Combining these observations we see $\tilde{\beta} = \hat{\beta} + S$ for $S \in S_{++}$
+\end{itemize}
+
+\subsubsection{Cramer-Rao lower bound}
+
+\subsection{Incorrect specification}
+Even under misspecification, we can write 
+\begin{align*}
+  E[x\epsilon] &= 0 \textrm{, since } E[x\epsilon] = E[x(y - x^T\beta)] \textrm{ and we define beta as} \beta &:= argmin_b E[(y - x^Tb)^2] \textrm{ where the first order condition is} -2E[x(y-x^T\beta)] = 0
+\end{align*}
+And we can use linear prediction as an approximation for the true underlying model. Note here that unlike for the correctly specified OLS, the estimand depends on the distribution of $x$, not just $E[y \mid x]$
+\begin{align*}
+  E[y \mid x] \neq x^T\beta \textrm{, but instead }\\
+  \beta = argmin_bE[(E[y\mid x] - x^Tb)^2] = E[xx^T]^{-1}E[xy]
+\end{align*}
+
+\subsubsection{Omitted variable bias}
+Suppose 
+\begin{align*}
+  \textrm{True model: } y &= \beta_1^* + x\beta_2^* + u\beta_3^* + \epsilon, \textrm{ where } E[\epsilon \mid x, u] = 0\\
+  \textrm{Regression: } y &= \beta_1 + x\beta_2\\
+  \textrm{Then } \hat{\beta_2} \textrm{ estimates } \beta_2^* &= \frac{Cov(y, x)}{Var(x)} = \frac{Cov(\beta_1^* + x\beta_2^* + u\beta_3^* + \epsilon, x)}{Var(x)} = \frac{Cov(\beta_1^*, x) + Cov(x\beta_2^*,x) + Cov(u\beta_3^*, x) + Cov(\epsilon, x)}{Var(x)}\\
+  &= \beta_2^* + \beta_3^* \frac{Cov(u,x)}{Var(x)}
+\end{align*}
+
+
+\section{Maximum likelihood estimation (MLE)}
+Estimation technique where we find the parameter that maximizes the likelihood of our data: $\hat{\theta} = argmax_\theta f_\theta(z_1, \dots, z_n) = \prod_{i=1}^n f_\theta(z_i)$ for $z_i$ i.i.d. 
+Oftentimes, we maximize the log-likelihood instead because it i) simplifies calculations, i) provides numerical stability, and iii) has ties to the information inequality ($\theta_0 = argmax_\theta E[\log f_\theta(x)])$
+
+\subsection{Conditional maximum likelihood}
+When we focus on conditional maximum likelihood, we don't always need to estimate all parameters. In fact, the log helps us drop extraneous ones.
+\begin{align*}
+  \textrm{Given: }& z=(y,x), \;\; y\mid x \sim f_\beta(y\mid x), \;\; x \sim g_\phi(x) \Longrightarrow f_\theta(x) = f\beta(y\mid x) g_\phi(x)\\
+  \log L(\theta) &= \sum_{i=1}^n \log(f_\theta(z_i)) = \sum_{i=1}^n \log(f_\beta(y_i\mid x_i)) + \log(g_\phi(x_))\\
+  \frac{\partial}{\partial \beta} \log L(\theta) &= \sum_{i=1}^n \frac{\partial}{\partial \beta}\log(f_\theta(z_i)) + 0
+\end{align*}
+
+\subsection{Generalized linear models}
+Linear prediction ($\nu = x^T\beta$) with a link function ($E[y\mid x] = g^{-1}(\nu) = \mu$). Common family is the linear exponential family of densities ($f_\mu(y) = \exp{a(\mu) + b(y) + c(\mu)y}$)
+
+\begin{table}[h]
+  \begin{center}
+  \begin{tabular}{llcc}
+       \textbf{Distribution} & \textbf{Linear exponential density} & \textbf{$E[y]$} & \textbf{$Var(y)$}\\
+       \midrule
+      Normal ($\sigma^2$ known) & $\exp(\frac{-u^2}{2\sigma^2} - \frac{1}{2}\ln(2\pi\sigma^2) - \frac{y^2}{2\sigma^2} + \frac{\mu}{\sigma^2}y)$ & $\mu=\mu$ & $\sigma^2$\\
+      Bernoulli & $\exp(\ln(1-p) + \ln(\frac{p}{1-p})y)$ & $\mu=p$ & $\mu(1-\mu)$\\
+      Exponential & $\exp(\ln(\lambda) - \lambda y)$ & $\mu=\frac{1}{\lambda}$ & $\mu^2$\\
+      Poisson & $\exp(-\lambda - \ln(y!) + y\ln\lambda)$ & $\mu=\lambda$ & $\mu$\\
+      \bottomrule
+  \end{tabular}
+  \end{center}
+\end{table}
+
+\subsection{Extremum estimators}
+Extremum estimators (also called M-estimators) solve $\hat{\theta} = argmax_\theta \hat{Q}_n(\theta)$. Under regularity conditions (including uniform convergence of $\hat{Q}_n(\theta)$ to $Q_0(\theta)$), we have that $\hat{\theta} \overset{p}{\longleftarrow} \theta_0$ (consistency). \\\\
+Clearly, the MLE is an extremum estimator: $\frac{1}{n}\sum_{i=1}^n\log(f_\theta(z_i)) = \hat{Q}_n(\theta) \longrightarrow Q_0(\theta) = E_{\theta_0}[\log(f_\theta(z))]$ with $\theta_0 = argmax Q_0(\theta)$. Hence, MLE is consistent
+
+\subsection{Asymptotic normality}
+We say that $\hat{\theta}$ is asymptotically linear with influence function $\psi(z)$ if 
+\begin{align*}
+  \sqrt{n}(\hat{\theta} - \theta_0) &= \frac{1}{\sqrt{n}}\sum_i\psi(z_i) + o_P(1) \textrm{ with } E[\psi(z)] = 0 \textrm{ and finite variance}\\
+  \sqrt{n}(\hat{\theta} - \theta_0) &\overset{d}{\longrightarrow} N(0, E[\psi(z)\psi(z)^T]) \textrm{ by CLT}
+\end{align*} 
+Consider the FOC of the MLE
+\begin{align*}
+  \sum_i s_{\hat{\theta}}(z_i) =& 0 \textrm{ where } s_\theta = \partial/\partial\theta \log f_\theta(z)\\
+  &s_{\hat{\theta}}(z_i) \approxeq s_{\theta_0}(z_i) + \partial/\partial\theta s_{\theta_0}(z_i)(\hat{\theta} - \theta_0) \\
+  &s_{\hat{\theta}}(z_i) = s_{\theta_0}(z_i) + \partial/\partial\theta s_{\overline{\theta}}(z_i)(\hat{\theta} - \theta_0) \textrm{ by mean-value theorem for } \norm{\overline{\theta} - \theta_0}{x} \leq \norm{\hat{\theta} - \theta_0}{x}\\
+  0 &= \sum_i s_{\hat{\theta}}(z_i) = \sum_i s_{\theta_0}(z_i) + \sum_i \partial/\partial\theta s_{\overline{\theta}}(z_i)(\hat{\theta} - \theta_0)\\
+  \sqrt{n}(\hat{\theta} - \theta_0) &= \left[-\frac{1}{n}\sum_i \partial/\partial\theta s_{\overline{\theta}}(z_i)\right]^{-1} \frac{1}{\sqrt{n}}\sum_i s_{\theta_0}(z_i) \textrm{ with }\\
+  & \left[-\frac{1}{n}\sum_i \partial/\partial\theta s_{\overline{\theta}}(z_i)\right]^{-1} \overset{p}{\longrightarrow} E\left[\frac{\partial s_{\theta_0}(z)}{\partial\theta}\right]^{-1}, \;\; \frac{1}{\sqrt{n}}\sum_i s_{\theta_0}(z_i) \overset{d}{\longrightarrow} N(0, Var(s_{\theta_0}(z)))\\
+  \textrm{so } \sqrt{n}(\hat{\theta} - \theta_0) &\overset{d}{\longrightarrow} N(0, H^{-1}JH^{-1}) \textrm{ where } H = E\left[\frac{\partial s_{\theta_0}(z)}{\partial\theta}\right] \textrm{ and } J = Var(s_{\theta_0}(z)) = E[s_{\theta_0}(z)z_{\theta_0}(z)^T]
+\end{align*}
+When correctly specified and under regularity conditions, the Information Matrix Equality ($H = -J$) applies and this asymptotic distribution simplifies to 
+\begin{align*}
+  \sqrt{n}(\hat{\theta} - \theta_0) \overset{d}{\longrightarrow} N(0, J^{-1})
+\end{align*}
+
+\subsection{Misspecification and QMLE}
+\subsection{Tests}
+
+
+
+\section{Generalized method of moments (GMM)}
+\section{Bayesian regression}
+\section{Machine learning}
+
+\end{document}

@@ -15,7 +15,7 @@
 
 \title{CME364A: Convex Optimization}
 \author{Erich Trieschman}
-\date{2021 Winter quarter class notes}
+% \date{2022/3 Winter quarter class notes}
 
 
 \newcommand{\userMarginInMm}{8}
@@ -70,7 +70,6 @@ Optimization problems have the form
 \end{align*}
 The objective function is $f_0$ and the constraints are $f_i$
 Functions can be optimized locally or globally. The true distinction within optimization problems isn't between linear and nonlinear programming, but rather convex and nonconvex programming. This field studies methods for using known convex optimization solutions in as broad a way as possible to reach solutions (or bounds of solutions) for convex and nonconvex optimization problems alike. 
-We can optimize
 
 \subsection{Least squares}
 Least squares is its own type of optimization problem without constraints:
@@ -78,7 +77,7 @@ Least squares is its own type of optimization problem without constraints:
    \textrm{minimize   } & f_0(x) = \norm{Ax - b}{2}^2 = \sum_{i=1}^k(a_i^Tx - b_i)^2
 \end{align*}
 \begin{itemize}
-  \item There exists an anlytical solution to this problem: $x = (A^TA)^{-1}xA^Tb$
+  \item There exists an anlytical solution to this problem: $x = (A^TA)^{-1}A^Tb$
   \item There are more flexible techniques, including
   \begin{itemize}
     \item Weighted least-squares: $f_0(x) = \sum_{i=1}^kw_i(a_i^Tx - b_i)^2$ for weights, $w_i$
@@ -104,7 +103,7 @@ An optimization problem where the objective and constraint functions are convex
 \section{Convex sets}
 \subsection{Definitions}
 \subsubsection{Affine sets}
-\textbf{Affine set:} for $x_1, x_2 \in C \subset \mathbb{R}^n$, $\theta x_1 + (1-\theta)x_2 \in C$\\
+\textbf{Affine set:} $\{x \mid Ax = b\}$, where we see for $x_1, x_2 \in C \subset \mathbb{R}^n$, $\theta x_1 + (1-\theta)x_2 \in C$\\
 \textbf{Affine combination:} for points, $x_1, \dots, x_k \in C$, $\theta_1x_1 + \dots + \theta_kx_k$, where $\sum \theta_i = 1$, is an affine combination. An affine set contains every affine combination of its points
 
 \subsubsection{Convex sets}
@@ -113,7 +112,7 @@ An optimization problem where the objective and constraint functions are convex
 \textbf{Convex hull:} The set of all convex combinations of points in $C$: $convC=\{\theta_1x_1+\dots+\theta_kx_k \mid x_i \in C, \theta_i \geq 0, i=1,\dots,k, \sum \theta_i = 1 \}$
 
 \subsubsection{Cones}
-\textbf{Cone:} a set $C$ is a cone if $\forall x \in C$ and $\forall \theta \geq 0$, we have $\theta x \in C$\\
+\textbf{Cone:} a set $C$ is a cone if $\forall x_1, x_2 \in C$ and $\forall \theta_1, \theta_2 \geq 0$, we have $\theta_1 x_1 + \theta_2 x_2 \in C$ (linear combination with non-negative coefficients). Note that thetas don't need to add to one\\
 \textbf{Convex cone:} a set is a convex cone if it is i) convex and ii) a cone. i.e., $\forall x,y \in C$ and $\forall \theta_1, \theta_2 \geq 0$, we have $\theta_1x + \theta_2y \in C$
 \textbf{Connic combination:} for points, $x_1, \dots, x_k \in C$, $\theta_1, \dots, \theta_k \geq 0$, $\theta_1x_1, \dots + \theta_kx_k$ is a connic combination. $C$ convex $\Leftrightarrow$ every convex combination $\in C$\\
 \textbf{Connic hull:} The set of all connic combinations of points in $C$: $\{\theta_1x_1+\dots+\theta_kx_k \mid x_i \in C, \theta_i \geq 0, i=1,\dots,k\}$
@@ -123,7 +122,7 @@ Simple examples below; more complex examples covered in subsections
 \begin{itemize}
   \item The empty set $\null$, any single point (i.e., singleton) $\{x_0\}$, and the whole space $\mathbb{R}^n$ are affine (hence, convex) subsets of $\mathbb{R}^n$
   \item Any line is affine. If it passes through zero, it is a subspace, hence also a convex cone
-  \item A line segment is convex, but not affine (unless it reduces to a point)
+  \item A line segment is convex, but not affine (unless it reduces to a point). Constructed by setting $\theta \in [0, 1]$ so that $x \in [x_1, x_2]$
   \item A ray, which has the form $\{x_0+\theta v\mid \theta \geq 0\}$ ,where $v \neq 0$,is convex, but not affine. It is a convex cone if its base $x_0 = 0$
   \item Any subspace is affine, and a convex cone (hence convex)
 \end{itemize}
@@ -148,17 +147,18 @@ Ellipsoids are convex sets of the form
 \begin{align*}
   \mathbb{E} = \{x \mid (x - x_c)^TP^{-1}(x - x_c) \leq r^2\} \Longleftrightarrow \{x + Au \mid \norm{u}{2} \leq 1\}
 \end{align*}
-Where $P$ is SPD and determines how far the ellipsoid extends in each direction. $A$ can be thought of (WLOG) as $P^{1/2}$
+Where $P$ is SPD and determines how far the ellipsoid extends in each direction. An ellipsoid is a ball when $P = aI$. $A$ can be thought of (WLOG) as $P^{1/2}$
 
 \subsubsection{Norm balls and cones}
 Norm balls and cones are convex\\
 \textbf{Norm ball:} $\{ x \mid \norm{x - x_c}{p} \leq r \} \in \mathbb{R}^n$\\
 \textbf{Norm cone:} $\{ (x,t) \mid \norm{x}{p} \leq t \} \in \mathbb{R}^{n+1}$\\
+Norm cones are a helpful way to reformulate problems. The graph of a function is sort of like a norm cone. 
 
 \subsubsection{Polyhedra}
 \textbf{Polyhedra} are convex sets. A polyhedron is the intersection of a finite number of halfspaces and hyperplanes. Affine sets, rays, line segments, and halfspaces are all polyhedra.
 \begin{align*}
-  \mathcal{P} = \{ x \mid a_j^Tx \leq b_j, \; c_i^Tx = d_i \}
+  \mathcal{P} = \{ x \mid a_j^Tx \leq b_j, \; c_i^Tx = d_i \}, \textrm{ for } i\in\{1, \dots, n\}, j\in\{1, \dots, m\}
 \end{align*}
 \textbf{Simplexes} are a special type of polyhedra with $k$ independent vectors defining the set:
 \begin{align*}
@@ -174,18 +174,20 @@ The set of symmetric semidefinite matrices $S^n_+$ is a convex cone. i.e., if $\
 
 
 \subsection{Operations preserving convexity}
+Can check for arbitrary case $x_1, x_2 \in C$, but better to show that it's a combination of convex sets. Street-fighting method: write code that randomly samples points and checks if the linear combination is C.
 \begin{itemize}
   \item \textbf{Intersection:} The intersection of a finite (or infinite) number of convex sets is also convex\\
   If $S_1, S_2$ convex $\Longrightarrow S_1 \cap S_2$ convex\\
-  If $S_\alpha$ convex for all $\alpha \in \mathcal{A} \Longrightarrow \bigcap_{\alpha \in \mathcal{A}} S_\alpha$ convex
+  If $S_\alpha$ convex for all $\alpha \in \mathcal{A} \Longrightarrow \bigcap_{\alpha \in \mathcal{A}} S_\alpha$ convex\\
+  \item \textbf{Image and inverse image}
   \item \textbf{Affine functions:} An affine transformation of a convex set is convex. This can be thought of as scaling a convex set or shifting a convex set\\
   If $S$ convex and $f(x)$ affine, then $f(S) = \{f(x) \mid x \in S\}$ is convex. 
-  \item \textbf{Perspective functions:} The perspective function scales vectors so that the last component is $1$, and then drops the last component. The result of a perspective function applied to a convex set is a convex set.
-  \item \textbf{Linear-fractional functions:} Linear-fractional functions are the composition of the perspective function with an affine function. They preserve convexity
+  \item \textbf{Perspective functions:} The perspective function scales vectors so that the last component is $1$, and then drops the last component. The result of a perspective function applied to a convex set is a convex set. $P: \mathbb{R}^{n+1} \rightarrow \mathbb{R}^n$, $P(x, t) = x/t$, $domP = \{(x,t) \mid t>0\}$
+  \item \textbf{Linear-fractional functions:} Linear-fractional functions are the composition of the perspective function with an affine function. They preserve convexity. $f: \mathbb{R}^n \rightarrow \mathbb{R}^m$, $f(x) = (Ax+b) / (c^Tx + d)$. Conditioning is a linear-fractional function.
 \end{itemize}
 
 
-\subsection{Generalized inequality} % might want this to come before `separating hypterplanes'
+\subsection{Generalized inequality} 
 Generalized inequality is a partial ordering in $\mathbb{R}^n$ that has many of the same properties as standard ordering in $\mathbb{R}$ ($<, >, \leq, \geq)$. Those properties include i) preserved under addition, ii) transitive, iii) preserved under nonnegative scaling, iv) reflexive, v) antisymmetric, vi) preserved under limits (see p44).\\
 We use \textit{proper cones} to define this ordering. A cone, $K$ is proper if it satisifes
 \begin{itemize}
@@ -209,8 +211,8 @@ Two useful examples of generalized inequalities:
 \subsubsection{Minimum and minimal elements}
 In generalized inequalities, not all values are comparable. This motivates different definitions for minimum elements.
 \begin{itemize}
-  \item $x \in S$ is \textit{minimum} if for every $y \in S$, we have $x \preceq_K y$. In set notation, $x \in S$ is minimum of $S \Longleftrightarrow S \subseteq x + K$
-  \item $x \in S$ is \textit{minimal} if $y \preceq_K x$ for $y \in S$, then $y = x$. In set notation, $x \in S$ is minimal in $S \Longleftrightarrow (x - K) \cap S = \{x\}$
+  \item (stronger definition) $x \in S$ is \textit{minimum} if for every $y \in S$, we have $x \preceq_K y$. In set notation, $x \in S$ is minimum of $S \Longleftrightarrow S \subseteq x + K$
+  \item (weaker definition) $x \in S$ is \textit{minimal} if when $y \preceq_K x$ for $y \in S$, then $y = x$. In set notation, $x \in S$ is minimal in $S \Longleftrightarrow (x - K) \cap S = \{x\}$
 \end{itemize}
 Visually, think of how far negative you can go in each direction. If you reach a single point in this effort, it's \textbf{minimum}. If you reach a line, those points on the line are \textbf{minimal}
 
@@ -458,6 +460,11 @@ Now, by properties of strong and weak duality we have
   \item Define variable constraints in the variable definition \verb|cp.Variable(n, nonneg=True)| or \verb|cp.Variable((m, n), PSD=True)|
   \item Axis-level norms: \verb|cp.norm(u, 2, axis=0)|
   \item sum of squares: \verb|cp.sum_squares()|
+\end{itemize}
+
+\section{Examples}
+\begin{itemize}
+  \item $\{ x \mid \abs{p(t)}, t\in [0, \pi/3]\} \Leftarrow \cap_{t\in [0, \pi/3]} \{x \mid p(t) \leq 1\}\cup \{x \mid p(t) \geq 1\}$
 \end{itemize}
 
 
