@@ -14,7 +14,7 @@
 \newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
 \newcommand{\abs}[1]{\lvert#1\rvert}
 
-\title{Econ271: Economectrics II, linear regression}
+\title{ECON271: Economectrics II, linear regression}
 \author{Erich Trieschman}
 \date{2023 Winter quarter class notes}
 
@@ -60,7 +60,7 @@
 \begin{document}
 \maketitle
 
-% \tableofcontents
+\tableofcontents
 
 \section{Regression models}
 Goal: Estimate $E[Y \mid X]$, oftentimes given $(y_i, x_i) \overset{iid}{\sim} P_\theta$
@@ -151,8 +151,6 @@ Depending on correct specification and homoskedasticity, the asymptotic variance
   \item Combining these observations we see $\tilde{\beta} = \hat{\beta} + S$ for $S \in S_{++}$
 \end{itemize}
 
-\subsubsection{Cramer-Rao lower bound}
-
 \subsection{Incorrect specification}
 Even under misspecification, we can write 
 \begin{align*}
@@ -175,7 +173,10 @@ Suppose
 
 
 \section{Maximum likelihood estimation (MLE)}
-Estimation technique where we find the parameter that maximizes the likelihood of our data: $\hat{\theta} = argmax_\theta f_\theta(z_1, \dots, z_n) = \prod_{i=1}^n f_\theta(z_i)$ for $z_i$ i.i.d. 
+Estimation technique where we find the parameter that maximizes the likelihood of our data: 
+\begin{align*}
+  \hat{\theta} = argmax_\theta f_\theta(z_1, \dots, z_n) = \prod_{i=1}^n f_\theta(z_i) \textrm{ for $z_i$ i.i.d.}
+\end{align*} 
 Oftentimes, we maximize the log-likelihood instead because it i) simplifies calculations, i) provides numerical stability, and iii) has ties to the information inequality ($\theta_0 = argmax_\theta E[\log f_\theta(x)])$
 
 \subsection{Conditional maximum likelihood}
@@ -228,13 +229,159 @@ When correctly specified and under regularity conditions, the Information Matrix
   \sqrt{n}(\hat{\theta} - \theta_0) \overset{d}{\longrightarrow} N(0, J^{-1})
 \end{align*}
 
+\subsection{Cramer-Rao lower bound}
+Under some regularity conditions, any unbiased estimator $\hat{\theta}$ of $\theta$ has variance that is no smaller than 
+\begin{align*}
+  Var\left(\frac{\partial \log f_{\theta_0}(z)}{\partial \theta_0}\right)^{-1} &= -E\left[\frac{\partial^2 \log f_{\theta_0}(z)}{\partial \theta_0 \partial \theta_0^T}\right] \textrm{ (by the information inequality)}\\
+  &= J^{-1} \textrm{ (as defined above)}
+\end{align*}
+
 \subsection{Misspecification and QMLE}
+The QMLE estimates
+\begin{align*}
+  \theta_0^* = \max_\theta E_{f_0}[\log f_\theta(z)]
+\end{align*}  
+For which the density $f_{\theta_0^*}(\cdot)$ (in our pre-specified family) is the best approximation to the true density $f_0(\cdot)$, in the sense of minimizing K—L Divergence.
+\begin{align*}
+  D(f_\theta \mid \mid f_0) = E_{f_0}[\log(f_0(z)/f_\theta(z))] = E_{f_0}[\log(f_0(z)] - E_{f_0}[/f_\theta(z))]
+\end{align*}
+And when the likelihood is in fact correctly specified, $f_0(z) = f_{\theta_0}(z)$ then $D(f_\theta \mid \mid f_0) = 0$
+
+\begin{table}[h]
+  \begin{center}
+  \begin{tabular}{lllll}
+       \textbf{Method} & \textbf{True dist.} & \textbf{Estimated dist.} & \textbf{Estimate} & \textbf{K-L Divergence}\\
+       \midrule
+      MLE & $z \sim f_{\theta_0}$ & $f_{\theta_0}$ & $\theta_0 = argmax_\theta E_{f_{\theta_0}}[\log f_\theta(z)]$ & $D(f_{\theta_0} \mid \mid f_{\theta_0}) = 0$\\
+      QMLE & $z \sim f_0$ & $f_{\theta_0}$ & $\theta_0^* = argmax_\theta E_{f_0}[\log f_\theta(z)]$ & $D(f_0 \mid\mid f_{\theta_0^*}) > 0$\\
+      \bottomrule
+  \end{tabular}
+  \end{center}
+\end{table}
+Note that the information inequality does not hold under QMLE so we have $\sqrt{n}(\hat{\theta} - \theta_0) \overset{d}{\longrightarrow} N(0, H^{-1}JH^{-1})$
+
 \subsection{Tests}
+Under our null hypothesis we suppose that some function of our parameters equals zero, $H_0: a(\theta_0) = 0$ where $a(\theta): \mathbb{R}^k \rightarrow \mathbb{R}^r$. 
+
+\subsubsection{Test overview}
+\begin{table}[h]
+  \begin{center}
+  \begin{tabular}{lcc}
+       \textbf{Test} & \textbf{model under null, $\tilde{\theta}$} & \textbf{model under alternative, $\hat{\theta}$}\\
+       \midrule
+      Wald & False & True\\
+      Lagrange Multiplier & True & False\\
+      Likelihood Ratio & True & True\\
+      \bottomrule
+  \end{tabular}
+  \end{center}
+\end{table}
+\begin{itemize}
+  \item The three tests are equivalent in large samples
+  \item Wald has a tendency to over-reject in finite samples (size distortion)
+  \item LM has low finite-sample power against some alternative
+  \item Wald and LM are not invariant to reparameterizations; for example, the  parameterization $H_0:\;\; 1 /(\beta_L + \beta_K) - 1 = 0$ could produce a different result in finite samples than $H_0:\;\; \beta_L + \beta_K - 1 = 0$, even though it's the same hypothesis
+\end{itemize}
+
+
+\subsubsection{Wald test}
+For $\hat{\theta}$ asymptotically normal, and given null, $H_0: a(\theta_0) = 0$
+\begin{align*}
+  \sqrt{n}(\hat{\theta} - \theta_0) &\overset{d}{\longrightarrow} N(0, V) \Longrightarrow \sqrt{n}(a(\hat{\theta}) - a(\theta_0)) \overset{d}{\longrightarrow} N\left(0, \frac{\partial a(\theta_0)}{\partial \theta}V\frac{\partial a(\theta_0)}{\partial \theta}^T\right) \textrm{ by the delta method}\\
+  H_0:\;\; & \sqrt{n} a(\hat{\theta}) \overset{d}{\longrightarrow} N\left(0, \frac{\partial a(\theta_0)}{\partial \theta}V\frac{\partial a(\theta_0)}{\partial \theta}^T\right)\\
+  H_0:\;\; & \sqrt{n} \left(\frac{\partial a(\theta_0)}{\partial \theta}V\frac{\partial a(\theta_0)}{\partial \theta}^T\right)^{-\frac{1}{2}}a(\hat{\theta}) \overset{d}{\longrightarrow} N(0, I)\\
+  H_0:\;\; & n \left(\left(\frac{\partial a(\theta_0)}{\partial \theta}V\frac{\partial a(\theta_0)}{\partial \theta}^T\right)^{-\frac{1}{2}}a(\hat{\theta})\right)^T \left(\left(\frac{\partial a(\theta_0)}{\partial \theta}V\frac{\partial a(\theta_0)}{\partial \theta}^T\right)^{-\frac{1}{2}}a(\hat{\theta})\right)\overset{d}{\longrightarrow} \chi_r^2 \overset{d}{=} \sum_{j=1}^r Z_j^2\\
+  H_0:\;\; & n * a(\hat{\theta})^T \left(\frac{\partial a(\theta_0)}{\partial \theta}V\frac{\partial a(\theta_0)}{\partial \theta}^T\right)^{-1}a(\hat{\theta}) \overset{d}{\longrightarrow} \chi_r^2 \\
+\end{align*}
+Rejecting the null hypothesis when
+\begin{align*}
+  W = n * a(\hat{\theta})^T \left(\frac{\partial a(\theta_0)}{\partial \theta}V\frac{\partial a(\theta_0)}{\partial \theta}^T\right)^{-1}a(\hat{\theta}) > Q_{1-\alpha(\chi_r^2)}
+\end{align*}
+We must assume that $\frac{\partial a(\theta_0)}{\partial \theta}$ has full row rank, $r$. I.e., the number of hypothesis, $r$ does not exceed the number of parameters, $k$, and the null hypothesis are not redundant or mutually inconsistent.
+
+\subsubsection{Likelihood ratio test}
+Here we look at the difference in log likelihoods between an unrestricted estimator and a restricted estimator follows a Chi squared distribution
+\begin{align*}
+  \hat{\theta} &= argmax_{\theta \in \Theta} \hat{Q_n}(\theta) \textrm{ the unrestricted estimator}\\
+  \tilde{\theta} &= argmax_{\theta \in \Theta} \hat{Q_n}(\theta) \; s.t. \; a(\theta) = 0 \textrm{ the restricted estimator}\\
+  H_0: \;\; & 2(\log L_n(\hat{\theta}) - \log L_n(\tilde{\theta})) \overset{d}{\longrightarrow} \chi_r^2
+\end{align*}
+Rejecting the null hypothesis when
+\begin{align*}
+  LR = 2(\log L_n(\hat{\theta}) - \log L_n(\tilde{\theta})) > Q_{1-\alpha(\chi_r^2)}
+\end{align*}
+
+
+\subsubsection{Lagrange multiplier (score) test}
+The motivation of this test is to see what the gradient of the log likelihood is under the restricted parameters. Under the null hypothesis, we assume this gradient is close to zero (the maximizer). For the same restricted and unrestricted estimators defined above
+
+\begin{align*}
+  H_0: \;\; & \frac{1}{n} \frac{\partial \log L_n(\tilde{\theta})}{\partial \theta}^T \hat{J}^{-1} \frac{\partial \log L_n(\tilde{\theta})}{\partial \theta} \overset{d}{\longrightarrow} \chi_r^2 \textrm{ where $\hat{J}$ is an efficient estimator for the Fischer Information Matrix}
+\end{align*}
+Rejecting the null hypothesis when
+\begin{align*}
+  LM = \frac{1}{n} \frac{\partial \log L_n(\tilde{\theta})}{\partial \theta}^T \hat{J}^{-1} \frac{\partial \log L_n(\tilde{\theta})}{\partial \theta} > Q_{1-\alpha(\chi_r^2)}
+\end{align*}
 
 
 
 \section{Generalized method of moments (GMM)}
-\section{Bayesian regression}
-\section{Machine learning}
+The generalized methods of moments estimand is a vector function, $g(z, \theta)$, such that the moment, $E[g(z, \theta)]$ identifies $\theta_0$:
+\begin{align*}
+  E[g(z, \theta)] = 0 \iff \theta = \theta_0 \textrm{, equivalently we have }\\
+  \theta_0 = argmin_\theta E[g(z, \theta)]^T WE[g(z, \theta)] \textrm{ for any } W \in S_{++}
+\end{align*}
+By analogy principle, we get the generalized method of moments estimator
+\begin{align*}
+  \hat{\theta} = argmin_\theta \left(\frac{1}{n}\sum_{i=1}^n g(z_i, \theta)\right)^T \hat{W} \left(\frac{1}{n}\sum_{i=1}^n g(z_i, \theta)\right) \textrm{ for any } W \in S_{++}
+\end{align*}
+Note, this is an extremum estimator, hence we get with it all the properties of consistency and asymptotic distribution!
+
+\begin{itemize}
+  \item If $r < k$, the model is not identified (no unique solution)
+  \item If $r = k$, the model is just identified and the choice of $\hat{W}$ is inconsequential
+  \item If $r > k$, the model is overidentified. In this case, the choice of $\hat{W}$ affects the estimator
+\end{itemize}
+
+\subsection{Asymptotic normality}
+Using Taylor expansions and the mean value theorem we can write the scaled difference between the estimator and the truth with respect to an influence function:
+\begin{align*}
+  \sqrt{n}(\hat{\theta} - \theta) &= -(\hat{G}^T\hat{W}\overline{G})^{-1} \hat{G}^T\hat{W}\frac{1}{\sqrt{n}}\sum_{i=1}^ng(z_i, \theta_0), \textrm{ where } \hat{G} = \frac{1}{n}\sum_{i=1}^n \frac{\partial g(z_i, \hat{\theta})}{\partial \theta}^T \;\;, \overline{G} = \frac{1}{n}\sum_{i=1}^n \frac{\partial g(z_i, \overline{\theta})}{\partial \theta}^T
+\end{align*}
+Since we can write it in this way, when we also assume the conditions in the consistency theorem, we have asymptotic normality
+\begin{align*}
+  \sqrt{n}(\hat{\theta} - \theta) &\overset{d}{\longrightarrow} N(0, (G^TWG)^{-1}G^TW\Omega WG(G^TWG)^{-1}), \textrm{ by Slutsky's Lemma where } \Omega = E[g(z, \theta_0)g(z, \theta_0)^T]
+\end{align*}
+Note when GMM is just-identified
+\begin{align*}
+  \sqrt{n}(\hat{\theta} - \theta) &\overset{d}{\longrightarrow} N(0, G^{-1}W^{-1}G^{-T}G^TW\Omega WGG^{-1}W^{-1}G^{-T}) \textrm{, since we can now distribute the inverse}\\
+  \sqrt{n}(\hat{\theta} - \theta) &\overset{d}{\longrightarrow} N(0, G^{-1}\Omega G^{-T}) 
+\end{align*}
+Note when GMM is over-identified, we can minimize the variance of our estimator by choosing $W = c\Omega^{-1}$
+\begin{align*}
+  \sqrt{n}(\hat{\theta} - \theta) &\overset{d}{\longrightarrow} N(0, (G^T(c\Omega^{-1})G)^{-1}G^T(c\Omega^{-1})\Omega (c\Omega^{-1})G(G^T(c\Omega^{-1})G)^{-1}) = N(0, (G^T\Omega^{-1}G)^{-1})
+\end{align*}
+
+
+\subsection{OLS as a special case}
+OLS is a special case of GMM. With assumptions $y = x^T\beta + \epsilon$, $E[\epsilon\mid x] = 0$, we have 
+\begin{align*}
+  E[g(z, \theta)] = 0 \iff E[x\epsilon] = 0 \iff E[x(y - x^T\beta)] = 0  
+\end{align*} 
+Which is simply the first order condition that we solve in OLS! We note that MLE is a special case of GMM too.
+
+\subsection{MLE as a special case}
+MLE is a special case of GMM. With $g(z, \theta) = s_\theta(z) = \partial/\partial\theta \log f_\theta(z)$ we note that 
+\begin{align*}
+  \hat{\theta}_{MLE} = argmin_\theta E[\log f_\theta(z)] \Longrightarrow \partial/\partial\theta \log f_\theta(z) = s_\theta(z) = 0
+\end{align*}
+
+\subsection{Example set-up}
+Set up for simple heteroskedastic linear regression
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.4\textwidth]{"gmm_hetero.png"}
+  \caption{Example of simple heteroskedastic linear regression}
+\end{figure}
 
 \end{document}
