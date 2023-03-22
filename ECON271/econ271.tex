@@ -571,15 +571,21 @@ Analytic delta method can be costly to compute or not possible. One alternative 
 
 
 
-
-
-
-
-
 % =====================================
 %     BINARY CHOICE MODELS
 % =====================================
 \section{Binary choice models}
+\begin{itemize}
+  \item For $y \in \{0, 1\}$, $E[y \mid x] = 1 * p(y=1 \mid x) + 0 * p(y=0\mid x) = p(y=1 \mid x)$
+  \item Since $x'\beta$ isn't bounded between 0 and 1, it's not the best model to use to model probability. but for $F: \mathbb{R} \rightarrow [0,1]$, we can model $p(y=1\mid x) = F(x'\beta)$. CDFs can make great link functions
+\end{itemize}
+
+\subsection{Deviance}
+Likelihood is related to the probability of your data given parameters. You want to make it as big as possible. Deviance refers to a notion of distance between data and the fit of the model. You want to make it as small as possible.
+\begin{align*}
+  \textrm{Deviance} &= -2\log[\textrm{likelihood}] + C \textrm{ for logistic regression}\\
+  \textrm{Deviance} &= \sum_i^n \hat{e}^2
+\end{align*}
 
 \subsection{Partial effects}
 Unlike the linear OLS model, now the partial effect is a function of $x$.
