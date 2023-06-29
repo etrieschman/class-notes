@@ -9,3 +9,5 @@ Class notes and cheat sheets for midterms and final exams
 | [CS 231N](https://explorecourses.stanford.edu/search?view=catalog&filter-coursestatus-Active=on&page=0&catalog=&academicYear=20212022&q=CS+231N%3A+Deep+Learning+for+Computer+Vision&collapse=) | Deep Learning for Computer Vision |
 | [STATS 200](https://explorecourses.stanford.edu/search?view=catalog&filter-coursestatus-Active=on&page=0&catalog=&academicYear=20212022&q=STATS+200%3A+Introduction+to+Statistical+Inference&collapse=) | Introduction to Statistical Inference |
 | [STATS 315A](https://explorecourses.stanford.edu/search?view=catalog&filter-coursestatus-Active=on&page=0&catalog=&academicYear=20212022&q=STATS+315A%3A+Modern+Applied+Statistics%3A+Learning&collapse=) | Modern Applied Statistics: Learning |
+| [ECON 271](https://explorecourses.stanford.edu/search?q=ECON271) | Intermediate Econometrics II |
+| [STATS 219](https://explorecourses.stanford.edu/search?view=catalog&filter-coursestatus-Active=on&page=0&catalog=&academicYear=&q=stats219&collapse=) | Stochastic Processes | 
